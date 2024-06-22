@@ -1,35 +1,76 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { CssBaseline, ThemeProvider } from "@mui/material";
+import { useMemo } from "react";
+import { useSelector } from "react-redux";
+import { createTheme } from "@mui/material/styles";
+import { themeSettings } from "./theme";
+import LoginClassifier from "./components/common/LoginClassifier";
+import SignupPrep from "./components/common/SignupPrep";
+import { State } from "./states/reducer";
+import DashboardPage from "./pages/DashboardPage";
+import EditorPage from "./pages/EditorPage";
+import ExperimentPage from "./pages/ExperimentPage";
+import ExportDataPage from "./pages/ExportDataPage";
+import ProfilePage from "./pages/ProfilePage";
+import CustomAlert from "./components/common/CustomAlert";
 
 function App() {
-  const [count, setCount] = useState(0)
+  const mode = useSelector((state: State) => state.mode);
+  const theme = useMemo(() => createTheme(themeSettings(mode)), [mode]);
+  const isAuth = Boolean(useSelector((state: State) => state.token));
 
   return (
     <>
-      <div>
-        <a href="https://vitejs.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.tsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
+      <BrowserRouter>
+        <ThemeProvider theme={theme}>
+          <CssBaseline />
+          <CustomAlert />
+          <Routes>
+            <Route
+              path="/"
+              element={
+                isAuth ? <DashboardPage /> : <Navigate to="/login/Researcher" />
+              }
+            />
+            <Route
+              path="/editor"
+              element={
+                isAuth ? <EditorPage /> : <Navigate to="/login/Researcher" />
+              }
+            />
+            <Route
+              path="/export-data"
+              element={
+                isAuth ? (
+                  <ExportDataPage />
+                ) : (
+                  <Navigate to="/login/Researcher" />
+                )
+              }
+            />
+            <Route
+              path="/experiment"
+              element={
+                isAuth ? (
+                  <ExperimentPage />
+                ) : (
+                  <Navigate to="/login/Researcher" />
+                )
+              }
+            />
+            <Route
+              path="/profile"
+              element={
+                isAuth ? <ProfilePage /> : <Navigate to="/login/Researcher" />
+              }
+            />
+            <Route path="/login/:userType" element={<LoginClassifier />} />
+            <Route path="/signup" element={<SignupPrep />} />
+          </Routes>
+        </ThemeProvider>
+      </BrowserRouter>
     </>
-  )
+  );
 }
 
-export default App
+export default App;
