@@ -1,24 +1,19 @@
-import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { CssBaseline, ThemeProvider } from "@mui/material";
 import { useMemo } from "react";
 import { useSelector } from "react-redux";
 import { createTheme } from "@mui/material/styles";
 import { themeSettings } from "./theme";
-import LoginClassifier from "./components/common/LoginClassifier";
-import SignupPrep from "./components/common/SignupPrep";
 import { State } from "./states/reducer";
-import DashboardPage from "./pages/DashboardPage";
-import EditorPage from "./pages/EditorPage";
-import ExperimentPage from "./pages/ExperimentPage";
-import ExportDataPage from "./pages/ExportDataPage";
-import ProfilePage from "./pages/ProfilePage";
-import CustomAlert from "./components/common/CustomAlert";
+import CustomAlert from "./components/CustomAlert";
+import CustomMap from "./components/CustomMap";
+import PlanRidePage from "./pages/PlanRidePage";
+import SelectRoutePage from "./pages/SelectRoutePage";
+import RouteDetailsPage from "./pages/SelectDetailsPage";
 
 function App() {
   const mode = useSelector((state: State) => state.mode);
   const theme = useMemo(() => createTheme(themeSettings(mode)), [mode]);
-  const isAuth = Boolean(useSelector((state: State) => state.token));
-
   return (
     <>
       <BrowserRouter>
@@ -26,46 +21,13 @@ function App() {
           <CssBaseline />
           <CustomAlert />
           <Routes>
+            <Route path="/get-route" element={<CustomMap />} />
+            <Route path="/plan-your-ride" element={<PlanRidePage />} />
+            <Route path="/select-route" element={<SelectRoutePage />} />
             <Route
-              path="/"
-              element={
-                isAuth ? <DashboardPage /> : <Navigate to="/login/Researcher" />
-              }
+              path="/select-route/:routeId"
+              element={<RouteDetailsPage />}
             />
-            <Route
-              path="/editor"
-              element={
-                isAuth ? <EditorPage /> : <Navigate to="/login/Researcher" />
-              }
-            />
-            <Route
-              path="/export-data"
-              element={
-                isAuth ? (
-                  <ExportDataPage />
-                ) : (
-                  <Navigate to="/login/Researcher" />
-                )
-              }
-            />
-            <Route
-              path="/experiment"
-              element={
-                isAuth ? (
-                  <ExperimentPage />
-                ) : (
-                  <Navigate to="/login/Researcher" />
-                )
-              }
-            />
-            <Route
-              path="/profile"
-              element={
-                isAuth ? <ProfilePage /> : <Navigate to="/login/Researcher" />
-              }
-            />
-            <Route path="/login/:userType" element={<LoginClassifier />} />
-            <Route path="/signup" element={<SignupPrep />} />
           </Routes>
         </ThemeProvider>
       </BrowserRouter>
