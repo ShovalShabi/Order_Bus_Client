@@ -1,6 +1,4 @@
 // import dotenv and call config to load variables into process.env
-import dotenv from "dotenv";
-dotenv.config();
 
 // Define a function to retrieve environment variables
 const getEnvVariables = () => {
@@ -9,11 +7,17 @@ const getEnvVariables = () => {
     VITE_ENV,
     VITE_REACT_APP_BACKEND_DEV_URL,
     VITE_REACT_APP_BACKEND_PROD_URL,
+    VITE_JAVASCRIPT_MAPS_API_KEY,
+    VITE_MAP_ID,
   } = process.env;
 
   // Validate required variables or provide default values
   const port = parseInt(VITE_PORT || "6001", 10); // Default to 3001 if VITE_PORT is not defined
   const env = VITE_ENV || "dev"; // Default to 'dev' if VITE_ENV is not defined
+
+  const apiGlobalKey = VITE_JAVASCRIPT_MAPS_API_KEY || "";
+
+  const mapID = VITE_MAP_ID || "";
 
   const backendURL =
     process.env.VITE_ENV !== "prod"
@@ -41,6 +45,8 @@ const getEnvVariables = () => {
     authObjRoute,
     authUsersURL,
     commandsURL,
+    apiGlobalKey,
+    mapID,
   };
 };
 
