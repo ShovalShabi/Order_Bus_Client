@@ -1,17 +1,19 @@
-interface LocationImpl {
-  lat: number;
-  lng: number;
-  equals(other: LocationImpl): boolean;
+interface ILocation {
+  latitude: number;
+  longitude: number;
+  equals?(other: ILocation): boolean;
 }
 
-export type { LocationImpl };
+export type { ILocation };
 
-class LocationClass implements LocationImpl {
-  constructor(public lat: number, public lng: number) {}
-  equals(other: LocationImpl): boolean {
+class Location implements ILocation {
+  constructor(public latitude: number, public longitude: number) {}
+  equals(other: ILocation): boolean {
     if (this === other) return true;
-    return this.lat === other.lat && this.lng === other.lng;
+    return (
+      this.latitude === other.latitude && this.longitude === other.longitude
+    );
   }
 }
 
-export { LocationClass };
+export default Location;
