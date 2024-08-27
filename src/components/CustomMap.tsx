@@ -5,17 +5,22 @@ import {
   AdvancedMarker,
   Pin,
   InfoWindow,
+  MapCameraChangedEvent,
 } from "@vis.gl/react-google-maps";
 import getEnvVariables from "../etc/loadVariables";
-
-interface Position {
-  lat: number;
-  lng: number;
-}
+import { ILocation } from "../utils/Location";
 
 export default function CustomMap() {
-  const [currentPosition, setCurrentPosition] = useState<Position | null>(null);
+  const [currentPosition, setCurrentPosition] = useState<ILocation | null>(
+    null
+  );
+  const [zoom, setZoom] = useState(18); // Initial zoom level
   const [open, setOpen] = useState(false);
+  const [busStations, setBusStations] = useState([]); // A list of bus staions according to user's selection
+
+  const handleZoomChange = (event: MapCameraChangedEvent) => {
+    setZoom(Number(event.detail.zoom));
+  };
 
   const { apiGlobalKey, mapID } = getEnvVariables();
 
@@ -39,7 +44,12 @@ export default function CustomMap() {
     <APIProvider apiKey={apiGlobalKey}>
       <div style={{ height: "100vh", width: "100%" }}>
         {currentPosition ? (
-          <Map center={currentPosition} mapId={mapID}>
+          <Map
+            defaultCenter={currentPosition}
+            mapId={mapID}
+            zoom={zoom}
+            onZoomChanged={handleZoomChange}
+          >
             <AdvancedMarker
               position={currentPosition}
               onClick={() => setOpen(true)}
