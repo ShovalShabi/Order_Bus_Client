@@ -9,6 +9,9 @@ import {
   Grow,
 } from "@mui/material";
 import { useNavigate } from "react-router-dom";
+import RouteService from "../services/orderBusService";
+import RouteRequestBoundary from "../bounderies/orderBus/routeRequestBoundary";
+import OrderBusRequestBoundary from "../bounderies/orderBus/orderBusRequest";
 
 const PlanRidePage: React.FC = () => {
   const [departure, setDeparture] = useState<string>("");
@@ -18,9 +21,31 @@ const PlanRidePage: React.FC = () => {
   const [submitted, setSubmitted] = useState(false);
   const navigate = useNavigate();
 
-  const handleSubmit = () => {
+  const routeService = new RouteService();
+
+  const handleSubmit = async () => {
     setSubmitted(true);
-    navigate("/select-route");
+
+    // Create RouteRequestBoundary
+    const routeRequest = new RouteRequestBoundary(
+      departure,
+      destination,
+      new Date(departureTime),
+      new Date(destinationTime)
+    );
+    console.log(
+      `departure time:${departureTime}, arrivalTime: ${destinationTime}`
+    );
+    console.log(routeRequest);
+    // Create OrderBusRequestBoundary
+    const orderBusRequest = new OrderBusRequestBoundary(true, routeRequest);
+
+    try {
+      const routes = await routeService.createRouteRequest(orderBusRequest);
+      navigate("/select-route", { state: { routes } });
+    } catch (error) {
+      console.error("Failed to fetch routes:", error);
+    }
   };
 
   const handleLocateMe = () => {
@@ -77,7 +102,7 @@ const PlanRidePage: React.FC = () => {
                 value={departure}
                 onChange={(e) => setDeparture(e.target.value)}
                 fullWidth
-                inputProps={{ dir: "auto" }} // Support RTL and UTF-8
+                inputProps={{ dir: "auto" }}
               />
             </Grid>
             <Grid item xs={12}>
@@ -87,7 +112,7 @@ const PlanRidePage: React.FC = () => {
                 value={destination}
                 onChange={(e) => setDestination(e.target.value)}
                 fullWidth
-                inputProps={{ dir: "auto" }} // Support RTL and UTF-8
+                inputProps={{ dir: "auto" }}
               />
             </Grid>
             <Grid item xs={12}>
