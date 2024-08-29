@@ -5,10 +5,11 @@ const getEnvVariables = () => {
   const {
     VITE_PORT,
     VITE_ENV,
-    VITE_REACT_APP_BACKEND_DEV_URL,
-    VITE_REACT_APP_BACKEND_PROD_URL,
+    VITE_HOST_TYPE,
     VITE_JAVASCRIPT_MAPS_API_KEY,
     VITE_MAP_ID,
+    VITE_ORDER_BUS_PORT,
+    VITE_FEEDBACK_PORT,
   } = process.env;
 
   // Validate required variables or provide default values
@@ -19,34 +20,18 @@ const getEnvVariables = () => {
 
   const mapID = VITE_MAP_ID || "";
 
-  const backendURL =
-    process.env.VITE_ENV !== "prod"
-      ? VITE_REACT_APP_BACKEND_DEV_URL
-      : VITE_REACT_APP_BACKEND_PROD_URL || "http://localhost:3000"; // Choosing the backend URL based on the enviorment variable, using the dev URL as default
+  //TODO: Need to specify between two environments by VITE_ENV
+  const orderBusURL = `http://${VITE_HOST_TYPE}:${VITE_ORDER_BUS_PORT}`;
 
-  const authURL = backendURL + "/auth";
-
-  const baseParticipantsURL = backendURL + "/participnats";
-
-  const entryURL = backendURL + "/entry";
-
-  const authObjRoute = authURL + "/objects";
-
-  const authUsersURL = authURL + "/users";
-
-  const commandsURL = authURL + "/commands";
+  const feedbackURL = `http://${VITE_HOST_TYPE}:${VITE_FEEDBACK_PORT}`;
 
   return {
     port,
     env,
-    backendURL,
-    baseParticipantsURL,
-    entryURL,
-    authObjRoute,
-    authUsersURL,
-    commandsURL,
     apiGlobalKey,
     mapID,
+    orderBusURL,
+    feedbackURL,
   };
 };
 
