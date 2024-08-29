@@ -1,4 +1,4 @@
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { CssBaseline, ThemeProvider } from "@mui/material";
 import { useMemo } from "react";
 import { useSelector } from "react-redux";
@@ -8,8 +8,7 @@ import { State } from "./states/reducer";
 import CustomAlert from "./components/CustomAlert";
 import CustomMap from "./components/CustomMap";
 import PlanRidePage from "./pages/PlanRidePage";
-import SelectRoutePage from "./pages/SelectRoutePage";
-import RouteDetailsPage from "./pages/SelectDetailsPage";
+import ChooseRidePage from "./pages/ChooseRidePage";
 
 function App() {
   const mode = useSelector((state: State) => state.mode);
@@ -23,11 +22,8 @@ function App() {
           <Routes>
             <Route path="/get-route" element={<CustomMap />} />
             <Route path="/plan-your-ride" element={<PlanRidePage />} />
-            <Route path="/select-route" element={<SelectRoutePage />} />
-            <Route
-              path="/select-route/:routeId"
-              element={<RouteDetailsPage />}
-            />
+            <Route path="/" element={<Navigate to={"/plan-your-ride"} />} />
+            <Route path="/choose-ride-option" element={<ChooseRidePage />} />
           </Routes>
         </ThemeProvider>
       </BrowserRouter>
