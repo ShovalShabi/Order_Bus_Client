@@ -16,7 +16,6 @@ export default function CustomMap() {
   );
   const [zoom, setZoom] = useState(18); // Initial zoom level
   const [open, setOpen] = useState(false);
-  const [busStations, setBusStations] = useState([]); // A list of bus staions according to user's selection
 
   const handleZoomChange = (event: MapCameraChangedEvent) => {
     setZoom(Number(event.detail.zoom));
@@ -29,10 +28,15 @@ export default function CustomMap() {
       navigator.geolocation.getCurrentPosition(
         (position) => {
           const { latitude, longitude } = position.coords;
-          setCurrentPosition({ lat: latitude, lng: longitude });
+          setCurrentPosition({ latitude, longitude });
         },
         (error) => {
           console.error("Error getting location", error);
+        },
+        {
+          enableHighAccuracy: true, // Request high accuracy
+          timeout: 5000, // Optional: Timeout after 5 seconds
+          maximumAge: 0, // Optional: Do not use a cached position
         }
       );
     } else {
@@ -45,13 +49,19 @@ export default function CustomMap() {
       <div style={{ height: "100vh", width: "100%" }}>
         {currentPosition ? (
           <Map
-            defaultCenter={currentPosition}
+            defaultCenter={{
+              lat: currentPosition.latitude,
+              lng: currentPosition.longitude,
+            }}
             mapId={mapID}
             zoom={zoom}
             onZoomChanged={handleZoomChange}
           >
             <AdvancedMarker
-              position={currentPosition}
+              position={{
+                lat: currentPosition.latitude,
+                lng: currentPosition.longitude,
+              }}
               onClick={() => setOpen(true)}
             >
               <Pin
@@ -63,7 +73,10 @@ export default function CustomMap() {
 
             {open && (
               <InfoWindow
-                position={currentPosition}
+                position={{
+                  lat: currentPosition.latitude,
+                  lng: currentPosition.longitude,
+                }}
                 onCloseClick={() => setOpen(false)}
               >
                 <p>Your current location</p>
