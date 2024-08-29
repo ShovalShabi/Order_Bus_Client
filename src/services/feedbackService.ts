@@ -17,10 +17,10 @@ class FeedbackService implements IFeedbackService {
   constructor(axiosInstance?: AxiosInstance) {
     // Load environment variables from .env files
     const envVariables = getEnvVariables();
-    const { backendURL } = envVariables;
+    const { feedbackURL } = envVariables;
 
     // Define base URL for the feedback API endpoint
-    this.baseUrl = `${backendURL}/feedback`;
+    this.baseUrl = `${feedbackURL}/feedback`;
     this.axiosInstance = axiosInstance || axios.create();
   }
 

@@ -18,10 +18,10 @@ class RouteService implements IOrderBusService {
   constructor(axiosInstance?: AxiosInstance) {
     // Load environment variables from .env files
     const envVariables = getEnvVariables();
-    const { backendURL } = envVariables;
+    const { orderBusURL } = envVariables;
 
     // Define base URLs for different API endpoints related to commands
-    const orderBusBaseUrl = backendURL + "/orderbus";
+    const orderBusBaseUrl = orderBusURL + "/stops";
     this.axiosInstance = axiosInstance || axios.create();
     this.baseUrl = orderBusBaseUrl;
   }
@@ -35,12 +35,15 @@ class RouteService implements IOrderBusService {
     request: OrderBusRequestBoundary
   ): Promise<OrderBusResponse[]> {
     try {
+      console.log(request);
+      console.log(this.baseUrl);
       const response = await this.axiosInstance.post<OrderBusResponse[]>(
-        `${this.baseUrl}/stops`,
+        `${this.baseUrl}`,
         request
       );
       return response.data;
     } catch (error) {
+      console.log(error);
       throw new Error(`Failed to create route request: ${error}`);
     }
   }
