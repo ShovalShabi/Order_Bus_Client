@@ -1,7 +1,7 @@
 import { createAction, createReducer } from "@reduxjs/toolkit";
 import ReduxActions from "../utils/ReduxActions";
-import RouteRequestBoundary from "../bounderies/orderBus/routeRequestBoundary";
 import Feedback from "../bounderies/feedback/Feedback";
+import { IRoute } from "../bounderies/orderBus/IRoute";
 
 /**
  * Interface representing the shape of the Redux state.
@@ -15,7 +15,7 @@ interface State {
   /**
    * The details of the last travel option that the user searched for.
    */
-  lastTravel: RouteRequestBoundary | null;
+  lastTravel: IRoute | null;
 
   /**
    * The feedback provided by the user.
@@ -39,7 +39,7 @@ const initialState: State = {
 /**
  * Action to set the details of the latest travel option.
  */
-const setTravel = createAction<RouteRequestBoundary>(ReduxActions.SET_TRAVEL);
+const setTravel = createAction<IRoute>(ReduxActions.SET_TRAVEL);
 
 /**
  * Action to clear the details of the latest travel option.
