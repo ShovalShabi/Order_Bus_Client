@@ -6,9 +6,10 @@ import { createTheme } from "@mui/material/styles";
 import { themeSettings } from "./theme";
 import { State } from "./states/reducer";
 import CustomAlert from "./components/CustomAlert";
-import CustomMap from "./components/CustomMap";
 import PlanRidePage from "./pages/PlanRidePage";
 import ChooseRidePage from "./pages/ChooseRidePage";
+import AppRoutes from "./utils/AppRoutes";
+import FeedbackPage from "./pages/FeedbackPage";
 
 function App() {
   const mode = useSelector((state: State) => state.mode);
@@ -20,10 +21,19 @@ function App() {
           <CssBaseline />
           <CustomAlert />
           <Routes>
-            <Route path="/get-route" element={<CustomMap />} />
-            <Route path="/plan-your-ride" element={<PlanRidePage />} />
-            <Route path="/" element={<Navigate to={"/plan-your-ride"} />} />
-            <Route path="/choose-ride-option" element={<ChooseRidePage />} />
+            <Route path={AppRoutes.PLAN_RIDE_PAGE} element={<PlanRidePage />} />
+            <Route
+              path={AppRoutes.ROOT}
+              element={<Navigate to={AppRoutes.PLAN_RIDE_PAGE} />}
+            />
+            <Route
+              path={AppRoutes.CHOOSE_RIDE_PAGE}
+              element={<ChooseRidePage />}
+            />
+            <Route
+              path={AppRoutes.FILL_RIDE_EXPERIENCE}
+              element={<FeedbackPage />}
+            />
           </Routes>
         </ThemeProvider>
       </BrowserRouter>
