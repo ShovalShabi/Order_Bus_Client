@@ -1,198 +1,94 @@
 import { createAction, createReducer } from "@reduxjs/toolkit";
 import ReduxActions from "../utils/ReduxActions";
-import UserRoles from "../utils/UserRoles";
-import { UserBoundaryImpl } from "../bounderies/user/UserBoundary";
-import { ObjectBoundaryImpl } from "../bounderies/object/ObjectBoundary";
+import RouteRequestBoundary from "../bounderies/orderBus/routeRequestBoundary";
+import Feedback from "../bounderies/feedback/Feedback";
 
+/**
+ * Interface representing the shape of the Redux state.
+ */
 interface State {
-  user: UserBoundaryImpl | null;
-  token: string | null;
+  /**
+   * The current theme mode, either 'light' or 'dark'.
+   */
   mode: "light" | "dark";
-  expiry: string | null;
-  userRole: UserRoles;
-  lastEditedItem: ObjectBoundaryImpl | null;
-  lastAnswer: ObjectBoundaryImpl | null;
-  currentExperiment: ObjectBoundaryImpl | null;
-  nextQuestion: ObjectBoundaryImpl | null;
-  questionsOfCurrentExp: ObjectBoundaryImpl[] | null;
+
+  /**
+   * The details of the last travel option that the user searched for.
+   */
+  lastTravel: RouteRequestBoundary | null;
+
+  /**
+   * The feedback provided by the user.
+   */
+  lastFeedback: Feedback | null;
 }
 
 export type { State };
 
+/**
+ * The initial state of the reducer.
+ */
 const initialState: State = {
-  user: null,
-  token: null,
   mode: "light",
-  expiry: null,
-  userRole: UserRoles.Participant,
-  lastEditedItem: null,
-  lastAnswer: null,
-  currentExperiment: null,
-  nextQuestion: null,
-  questionsOfCurrentExp: null,
+  lastTravel: null,
+  lastFeedback: null,
 };
 
 // Define actions
-const logedIn = createAction<{
-  user: UserBoundaryImpl;
-  token: string;
-  expiry: string;
-}>(ReduxActions.LOGED_IN);
 
-const logedOut = createAction<void>(ReduxActions.LOGED_OUT);
+/**
+ * Action to set the details of the latest travel option.
+ */
+const setTravel = createAction<RouteRequestBoundary>(ReduxActions.SET_TRAVEL);
 
-const answeredItem = createAction<{ lastAnswer: ObjectBoundaryImpl }>(
-  ReduxActions.ANSWERED_ITEM
-);
+/**
+ * Action to clear the details of the latest travel option.
+ */
+const clearTravel = createAction<void>(ReduxActions.CLEAR_TRAVEL);
 
-const editedItem = createAction<{ lastEditedItem: ObjectBoundaryImpl }>(
-  ReduxActions.EDITED_ITEM
-);
+/**
+ * Action to set the feedback provided by the user.
+ */
+const setFeedback = createAction<Feedback>(ReduxActions.SET_FEEDBACK);
 
-const setCurrentExperiment = createAction<{
-  currentExperiment: ObjectBoundaryImpl;
-}>(ReduxActions.SET_CURRENT_EXPERIMENT);
+/**
+ * Action to clear the feedback provided by the user.
+ */
+const clearFeedback = createAction<void>(ReduxActions.CLEAR_FEEDBACK);
 
-const unsetCurrentExperiment = createAction<void>(
-  ReduxActions.UNSET_CURRENT_EXPERIMENT
-);
+/**
+ * Action to toggle the theme mode between 'light' and 'dark'.
+ */
+const toggleMode = createAction<void>(ReduxActions.TOGGLE_MODE);
 
-const prepareNextQuestion = createAction<void>(
-  ReduxActions.PEREPARE_NEXT_QUESTION
-);
-
-const loadQuestionsToExp = createAction<{ questions: ObjectBoundaryImpl[] }>(
-  ReduxActions.LOAD_QUESTIONS_TO_EXP
-);
-
-// Type guards
-const isArrayOfBooleans = (value: unknown): value is boolean[] =>
-  Array.isArray(value) && value.every((item) => typeof item === "boolean");
-
-const isArrayOfStrings = (value: unknown): value is string[] =>
-  Array.isArray(value) && value.every((item) => typeof item === "string");
-
+/**
+ * The reducer function that handles the state changes based on the actions.
+ * @param initialState The initial state of the reducer.
+ */
 const reducer = createReducer(initialState, (builder) => {
   builder
-    .addCase(logedIn, (state, action) => {
-      const deepCopyUser = { ...action.payload.user };
-      deepCopyUser.userDetails = { ...action.payload.user.userDetails };
-      state.user = deepCopyUser;
-      state.token = action.payload.token;
-      state.expiry = action.payload.expiry;
-      let role;
-      switch (deepCopyUser.role) {
-        case UserRoles.Admin:
-          role = UserRoles.Admin;
-          break;
-        case UserRoles.Researcher:
-          role = UserRoles.Researcher;
-          break;
-        case UserRoles.Participant:
-          role = UserRoles.Participant;
-          break;
-        default:
-          role = UserRoles.Participant;
-          break;
-      }
-      state.userRole = role;
-      return state;
+    .addCase(setTravel, (state, action) => {
+      // Set the details of the latest travel option.
+      state.lastTravel = action.payload;
     })
-    .addCase(logedOut, (state) => {
-      state.user = null;
-      state.token = null;
-      state.expiry = null;
-      return state;
+    .addCase(clearTravel, (state) => {
+      // Clear the details of the latest travel option.
+      state.lastTravel = null;
     })
-    .addCase(answeredItem, (state, action) => {
-      const deepCopyAnswer = { ...action.payload.lastAnswer };
-      deepCopyAnswer.objectDetails = {
-        ...action.payload.lastAnswer.objectDetails,
-      };
-      state.lastAnswer = deepCopyAnswer;
-      return state;
+    .addCase(setFeedback, (state, action) => {
+      // Set the feedback provided by the user.
+      state.lastFeedback = action.payload;
     })
-    .addCase(editedItem, (state, action) => {
-      const deepCopyEditedItem = { ...action.payload.lastEditedItem };
-      deepCopyEditedItem.objectDetails = {
-        ...action.payload.lastEditedItem.objectDetails,
-      };
-      state.lastEditedItem = action.payload.lastEditedItem;
-      return state;
+    .addCase(clearFeedback, (state) => {
+      // Clear the feedback provided by the user.
+      state.lastFeedback = null;
     })
-    .addCase(setCurrentExperiment, (state, action) => {
-      const deepCopyCurrentExperiment = { ...action.payload.currentExperiment };
-      deepCopyCurrentExperiment.objectDetails = {
-        ...action.payload.currentExperiment.objectDetails,
-      };
-      state.currentExperiment = deepCopyCurrentExperiment;
-      return state;
-    })
-    .addCase(unsetCurrentExperiment, (state) => {
-      state.currentExperiment = null;
-      state.questionsOfCurrentExp = null;
-    })
-    .addCase(prepareNextQuestion, (state) => {
-      if (state.currentExperiment && state.questionsOfCurrentExp) {
-        const currentExp = state.currentExperiment;
-        const experimentFlow = currentExp.objectDetails.experimentFlow;
-
-        if (isArrayOfBooleans(experimentFlow) && experimentFlow.length > 0) {
-          const indicator = experimentFlow.shift()!; //Getting the indicator of the question if exists
-
-          // true - the question is fixed and here is a need to disaply it by order
-          if (indicator) {
-            const fixedQuestions = currentExp.objectDetails.fixedQuestions; // Refrencing the array
-            if (isArrayOfStrings(fixedQuestions) && fixedQuestions.length > 0) {
-              const quesIternalID = fixedQuestions.shift()!; // Retrieving the id of the first order of the fixed quetions
-              const nextQuestion = state.questionsOfCurrentExp.find(
-                (child) => child.objectId.internalObjectId === quesIternalID
-              ); //Getting the child object that has the target id
-              state.nextQuestion = nextQuestion || null;
-            }
-            // false - the question is randomized
-          } else {
-            const randomizedQuestions =
-              currentExp.objectDetails.randomizedQuestions; // Refrencing the array
-            if (
-              isArrayOfStrings(randomizedQuestions) &&
-              randomizedQuestions.length > 0
-            ) {
-              const randomIndex = Math.floor(
-                Math.random() * randomizedQuestions.length
-              );
-              const quesIternalID = randomizedQuestions.splice(
-                randomIndex,
-                1
-              )[0]; // Choosing a random ID by index and reorganizing the array
-
-              const nextQuestion = state.questionsOfCurrentExp.find(
-                (child) => child.objectId.internalObjectId === quesIternalID
-              ); // Fetching the actual question object
-
-              state.nextQuestion = nextQuestion || null; // Setting the next question
-            }
-          }
-        } else {
-          state.nextQuestion = null;
-        }
-      }
-    })
-    .addCase(loadQuestionsToExp, (state, action) => {
-      state.questionsOfCurrentExp = [...action.payload.questions];
-      return state;
+    .addCase(toggleMode, (state) => {
+      // Toggle the theme mode between 'light' and 'dark'.
+      state.mode = state.mode === "light" ? "dark" : "light";
     });
 });
 
 export default reducer;
 
-export {
-  logedIn,
-  logedOut,
-  answeredItem,
-  editedItem,
-  setCurrentExperiment,
-  unsetCurrentExperiment,
-  prepareNextQuestion,
-  loadQuestionsToExp,
-};
+export { setTravel, clearTravel, setFeedback, clearFeedback, toggleMode };
