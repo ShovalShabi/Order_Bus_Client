@@ -5,26 +5,26 @@
 class RouteRequestBoundary {
   private originAddress: string;
   private destinationAddress: string;
-  private originDepartureTime: Date | null;
-  private destinationArrivalTime: Date | null;
+  private departureTime: Date | null;
+  private arrivalTime: Date | null;
 
   /**
    * Creates an instance of RouteRequestBoundary.
    * @param originAddress - The starting point of the route.
    * @param destinationAddress - The endpoint of the route.
-   * @param originDepartureTime - The departure time from the origin.
-   * @param destinationArrivalTime - The arrival time at the destination.
+   * @param departureTime - The departure time from the origin.
+   * @param arrivalTime - The arrival time at the destination.
    */
   constructor(
     originAddress: string,
     destinationAddress: string,
-    originDepartureTime: Date,
-    destinationArrivalTime: Date
+    departureTime: Date | null,
+    arrivalTime: Date | null
   ) {
     this.originAddress = originAddress;
     this.destinationAddress = destinationAddress;
-    this.originDepartureTime = originDepartureTime;
-    this.destinationArrivalTime = destinationArrivalTime;
+    this.departureTime = departureTime;
+    this.arrivalTime = arrivalTime;
   }
 
   /**
@@ -63,32 +63,32 @@ class RouteRequestBoundary {
    * Gets the origin departure time.
    * @returns The departure time from the origin as a Date object.
    */
-  getOriginDepartureTime(): Date | null {
-    return this.originDepartureTime;
+  getDepartureTime(): Date | null {
+    return this.departureTime;
   }
 
   /**
    * Sets the origin departure time.
-   * @param originDepartureTime - The new departure time from the origin.
+   * @param departureTime - The new departure time from the origin.
    */
-  setOriginDepartureTime(originDepartureTime: Date): void {
-    this.originDepartureTime = originDepartureTime;
+  setDepartureTime(departureTime: Date): void {
+    this.departureTime = departureTime;
   }
 
   /**
    * Gets the destination arrival time.
    * @returns The arrival time at the destination as a Date object.
    */
-  getDestinationArrivalTime(): Date | null {
-    return this.destinationArrivalTime;
+  getArrivalTime(): Date | null {
+    return this.arrivalTime;
   }
 
   /**
    * Sets the destination arrival time.
-   * @param destinationArrivalTime - The new arrival time at the destination.
+   * @param arrivalTime - The new arrival time at the destination.
    */
-  setDestinationArrivalTime(destinationArrivalTime: Date): void {
-    this.destinationArrivalTime = destinationArrivalTime;
+  setArrivalTime(arrivalTime: Date): void {
+    this.arrivalTime = arrivalTime;
   }
 }
 
