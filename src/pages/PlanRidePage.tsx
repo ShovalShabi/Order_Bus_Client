@@ -9,43 +9,68 @@ import {
   Grow,
 } from "@mui/material";
 import { useNavigate } from "react-router-dom";
-import RouteService from "../services/orderBusService";
-import RouteRequestBoundary from "../bounderies/orderBus/routeRequestBoundary";
-import OrderBusRequestBoundary from "../bounderies/orderBus/orderBusRequest";
+import { useDispatch, useSelector } from "react-redux";
+import { setTravel, State } from "../states/reducer";
+import { IRoute } from "../bounderies/orderBus/IRoute";
+import AppRoutes from "../utils/AppRoutes";
 
 const PlanRidePage: React.FC = () => {
-  const [departure, setDeparture] = useState<string>("");
-  const [destination, setDestination] = useState<string>("");
-  const [departureTime, setDepartureTime] = useState<string>("");
-  const [destinationTime, setDestinationTime] = useState<string>("");
-  const [submitted, setSubmitted] = useState(false);
+  const dispatch = useDispatch();
   const navigate = useNavigate();
 
-  const routeService = new RouteService();
+  // Get the travel data from Redux store
+  const travelData = useSelector((state: State) => state.lastTravel);
+
+  // Set initial state based on Redux store or default to empty strings
+  const [departure, setDeparture] = useState<string>(travelData?.origin || "");
+  const [destination, setDestination] = useState<string>(
+    travelData?.destination || ""
+  );
+
+  const [departureTime, setDepartureTime] = useState<string>(() => {
+    if (travelData?.departureTime) {
+      // If departureTime is not null, format it as a string
+      return new Date(travelData.departureTime).toTimeString().slice(0, 5);
+    }
+    // Return an empty string if departureTime is null
+    return "";
+  });
+
+  const [arrivalTime, setArrivalTime] = useState<string>(() => {
+    if (travelData?.arrivalTime) {
+      // If arrivalTime is not null, format it as a string
+      return new Date(travelData.arrivalTime).toTimeString().slice(0, 5);
+    }
+    // Return an empty string if arrivalTime is null
+    return "";
+  });
 
   const handleSubmit = async () => {
-    setSubmitted(true);
+    // Combine the current date with the selected time
+    const currentDate = new Date();
+    const combinedDepartureTime = new Date(
+      `${currentDate.toDateString()} ${departureTime}`
+    );
+    const combinedArrivalTime = new Date(
+      `${currentDate.toDateString()} ${arrivalTime}`
+    );
 
     // Create RouteRequestBoundary
-    const routeRequest = new RouteRequestBoundary(
-      departure,
-      destination,
-      new Date(departureTime),
-      new Date(destinationTime)
-    );
+    const routeRequest: IRoute = {
+      origin: departure,
+      destination: destination,
+      departureTime: combinedDepartureTime,
+      arrivalTime: combinedArrivalTime,
+    };
+
     console.log(
-      `departure time:${departureTime}, arrivalTime: ${destinationTime}`
+      `departure time: ${combinedDepartureTime}, arrivalTime: ${combinedArrivalTime}`
     );
     console.log(routeRequest);
-    // Create OrderBusRequestBoundary
-    const orderBusRequest = new OrderBusRequestBoundary(true, routeRequest);
 
-    try {
-      const routes = await routeService.createRouteRequest(orderBusRequest);
-      navigate("/select-route", { state: { routes } });
-    } catch (error) {
-      console.error("Failed to fetch routes:", error);
-    }
+    // Store the last travel in Redux state
+    dispatch(setTravel(routeRequest));
+    navigate(AppRoutes.CHOOSE_RIDE_PAGE);
   };
 
   const handleLocateMe = () => {
@@ -130,13 +155,13 @@ const PlanRidePage: React.FC = () => {
             </Grid>
             <Grid item xs={12}>
               <Typography variant="subtitle1" gutterBottom>
-                Destination Time
+                Arrival Time
               </Typography>
               <TextField
                 type="time"
                 variant="outlined"
-                value={destinationTime}
-                onChange={(e) => setDestinationTime(e.target.value)}
+                value={arrivalTime}
+                onChange={(e) => setArrivalTime(e.target.value)}
                 fullWidth
                 inputProps={{ step: 300 }} // 5 minutes interval
               />
@@ -157,10 +182,7 @@ const PlanRidePage: React.FC = () => {
                 color="primary"
                 onClick={handleSubmit}
                 disabled={
-                  !departure ||
-                  !destination ||
-                  !departureTime ||
-                  !destinationTime
+                  !departure || !destination || !departureTime || !arrivalTime
                 }
                 fullWidth
               >
@@ -169,20 +191,6 @@ const PlanRidePage: React.FC = () => {
             </Grid>
           </Grid>
         </Grow>
-        {submitted && (
-          <Grow in timeout={2000}>
-            <Box mt={4}>
-              <Typography variant="h6">Departure: {departure}</Typography>
-              <Typography variant="h6">Destination: {destination}</Typography>
-              <Typography variant="h6">
-                Departure Time: {departureTime}
-              </Typography>
-              <Typography variant="h6">
-                Destination Time: {destinationTime}
-              </Typography>
-            </Box>
-          </Grow>
-        )}
       </Box>
     </Container>
   );
