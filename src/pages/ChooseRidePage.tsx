@@ -1,88 +1,67 @@
-import { useState } from "react";
-import OrderBusResponse from "../bounderies/orderBus/orderBusResponse";
-import RouteFlow from "../bounderies/orderBus/routeFlow";
+import { useEffect } from "react";
+import { useSelector } from "react-redux";
+import { useNavigate } from "react-router-dom";
+import { Box, Button, Container, Divider, Typography } from "@mui/material";
 import CustomMap from "../components/CustomMap";
-import {
-  Box,
-  Button,
-  Container,
-  Divider,
-  List,
-  ListItem,
-  ListItemText,
-  Typography,
-} from "@mui/material";
+import { State } from "../states/reducer";
+import AppRoutes from "../utils/AppRoutes";
 
-// Stub data for visualization
-const stubData: OrderBusResponse[] = [
-  new OrderBusResponse(
-    "Origin A",
-    "Destination A",
-    "08:00 AM",
-    "09:00 AM",
-    "2024-08-28T08:00:00Z",
-    new RouteFlow([], [])
-  ),
-  new OrderBusResponse(
-    "Origin B",
-    "Destination B",
-    "09:00 AM",
-    "10:00 AM",
-    "2024-08-28T09:00:00Z",
-    new RouteFlow([], [])
-  ),
-];
+// Assuming OrderBusResponse has similar structure to IRoute
+// const fetchRides = async (route: IRoute) => {
+//   // This function should call the Google API and return the route data
+//   // Replace this with actual API call
+//   return [
+//     {
+//       origin: route.origin,
+//       destination: route.destination,
+//       initialDepartureTime:
+//         route.departureTime?.toTimeString().slice(0, 5) || "",
+//       finalArrivalTime: route.arrivalTime?.toTimeString().slice(0, 5) || "",
+//     },
+//   ];
+// };
 
 export default function ChooseRidePage() {
-  const [selectedRide, setSelectedRide] = useState<OrderBusResponse | null>(
-    null
-  );
+  const navigate = useNavigate();
+  // const dispatch = useDispatch();
+  const travelData = useSelector((state: State) => state.lastTravel);
+
+  // const [rides, setRides] = useState<any[]>([]);
+  // const [selectedRide, setSelectedRide] = useState<any | null>(null);
+
+  useEffect(() => {
+    if (!travelData) {
+      navigate(AppRoutes.PLAN_RIDE_PAGE);
+      return;
+    }
+
+    // const fetchAndSetRides = async () => {
+    //   const result = await fetchRides(travelData);
+    //   // setRides(result);
+    // };
+
+    // fetchAndSetRides();
+  }, [travelData, navigate]);
 
   return (
     <Container
       maxWidth="xl"
       sx={{ height: "100vh", display: "flex", flexDirection: "column" }}
     >
-      {/* Top Section: Title */}
       <Typography variant="h4" sx={{ my: 2 }}>
         Choose Your Ride
       </Typography>
 
       <Box sx={{ display: "flex", flex: 1, overflow: "hidden" }}>
-        {/* Left Pane: Ride options */}
-        <Box
-          sx={{
-            width: "30%",
-            overflowY: "auto",
-            p: 2,
-            backgroundColor: "#96C9F4",
-          }}
-        >
-          <Typography variant="h6">Available Rides</Typography>
-          <List>
-            {stubData.map((ride, index) => (
-              <ListItem
-                key={index}
-                button
-                onClick={() => setSelectedRide(ride)}
-                sx={{
-                  border: "1px solid #ccc",
-                  borderRadius: "8px",
-                  mb: 2,
-                }}
-              >
-                <ListItemText
-                  primary={`${ride.origin} to ${ride.destination}`}
-                  secondary={`Time: ${ride.initialDepartureTime} - ${ride.finalArrivalTime}`}
-                />
-              </ListItem>
-            ))}
-          </List>
-        </Box>
-
-        {/* Right Pane: Map */}
         <Box sx={{ flex: 1 }}>
-          <CustomMap />
+          {travelData && (
+            <CustomMap
+              origin={travelData.origin}
+              destination={travelData.destination}
+              departureTime={travelData.departureTime}
+              arrivalTime={travelData.arrivalTime}
+            />
+          )}
         </Box>
       </Box>
 
@@ -101,7 +80,7 @@ export default function ChooseRidePage() {
         <Button
           variant="contained"
           color="secondary"
-          onClick={() => console.log("Go Back clicked")}
+          onClick={() => navigate(AppRoutes.PLAN_RIDE_PAGE)}
           sx={{ mx: 2 }}
         >
           Go Back
