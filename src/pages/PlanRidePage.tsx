@@ -10,7 +10,7 @@ import {
 } from "@mui/material";
 import { useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
-import { setTravel, State } from "../states/reducer";
+import { clearRoute, setTravel, State } from "../states/reducer";
 import { IRoute } from "../bounderies/orderBus/IRoute";
 import AppRoutes from "../utils/AppRoutes";
 
@@ -50,10 +50,10 @@ const PlanRidePage: React.FC = () => {
     const currentDate = new Date();
     const combinedDepartureTime = new Date(
       `${currentDate.toDateString()} ${departureTime}`
-    );
+    ).toLocaleString();
     const combinedArrivalTime = new Date(
       `${currentDate.toDateString()} ${arrivalTime}`
-    );
+    ).toLocaleString();
 
     // Create RouteRequestBoundary
     const routeRequest: IRoute = {
@@ -63,11 +63,9 @@ const PlanRidePage: React.FC = () => {
       arrivalTime: combinedArrivalTime,
     };
 
-    console.log(
-      `departure time: ${combinedDepartureTime}, arrivalTime: ${combinedArrivalTime}`
-    );
     console.log(routeRequest);
 
+    dispatch(clearRoute());
     // Store the last travel in Redux state
     dispatch(setTravel(routeRequest));
     navigate(AppRoutes.CHOOSE_RIDE_PAGE);
