@@ -6,41 +6,16 @@ import CustomMap from "../components/CustomMap";
 import { State } from "../states/reducer";
 import AppRoutes from "../utils/AppRoutes";
 
-// Assuming OrderBusResponse has similar structure to IRoute
-// const fetchRides = async (route: IRoute) => {
-//   // This function should call the Google API and return the route data
-//   // Replace this with actual API call
-//   return [
-//     {
-//       origin: route.origin,
-//       destination: route.destination,
-//       initialDepartureTime:
-//         route.departureTime?.toTimeString().slice(0, 5) || "",
-//       finalArrivalTime: route.arrivalTime?.toTimeString().slice(0, 5) || "",
-//     },
-//   ];
-// };
-
 export default function ChooseRidePage() {
   const navigate = useNavigate();
   // const dispatch = useDispatch();
   const travelData = useSelector((state: State) => state.lastTravel);
-
-  // const [rides, setRides] = useState<any[]>([]);
-  // const [selectedRide, setSelectedRide] = useState<any | null>(null);
 
   useEffect(() => {
     if (!travelData) {
       navigate(AppRoutes.PLAN_RIDE_PAGE);
       return;
     }
-
-    // const fetchAndSetRides = async () => {
-    //   const result = await fetchRides(travelData);
-    //   // setRides(result);
-    // };
-
-    // fetchAndSetRides();
   }, [travelData, navigate]);
 
   return (
