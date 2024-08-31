@@ -4,6 +4,8 @@ enum ReduxActions {
   SET_FEEDBACK = "SET_FEEDBACK",
   CLEAR_FEEDBACK = "CLEAR_FEEDBACK",
   TOGGLE_MODE = "TOGGLE_MODE",
+  SET_ROUTE = "SET_ROUTE",
+  CLEAR_ROUTE = "CLEAR_ROUTE",
 }
 
 export default ReduxActions;

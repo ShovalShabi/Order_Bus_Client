@@ -4,8 +4,8 @@
 interface IRoute {
   origin: string;
   destination: string;
-  departureTime: Date | null;
-  arrivalTime: Date | null;
+  departureTime: string | null;
+  arrivalTime: string | null;
 }
 
 export type { IRoute };
