@@ -4,31 +4,31 @@
  */
 class Feedback {
   private lineNumber: string;
-  private agencyName: string;
+  private agency: string;
   private rating: number;
-  private email?: string; // Optional parameter
-  private description: string;
+  private userEmail?: string; // Optional parameter
+  private additionalDetails: string;
 
   /**
    * Creates an instance of Feedback.
    * @param lineNumber - The line number for which the feedback is provided.
-   * @param agencyName - The name of the agency operating the line.
+   * @param agency - The name of the agency operating the line.
    * @param rating - The rating provided in the feedback (e.g., 1 to 5).
-   * @param description - A detailed description of the feedback.
-   * @param email - (Optional) The email address of the person providing the feedback.
+   * @param additionalDetails - A detailed text of the feedback.
+   * @param userEmail - (Optional) The email address of the person providing the feedback.
    */
   constructor(
     lineNumber: string,
-    agencyName: string,
+    agency: string,
     rating: number,
-    description: string,
-    email?: string
+    additionalDetails: string,
+    userEmail?: string
   ) {
     this.lineNumber = lineNumber;
-    this.agencyName = agencyName;
+    this.agency = agency;
     this.rating = rating;
-    this.description = description;
-    this.email = email;
+    this.additionalDetails = additionalDetails;
+    this.userEmail = userEmail;
   }
 
   /**
@@ -51,16 +51,16 @@ class Feedback {
    * Gets the agency name.
    * @returns The agency name as a string.
    */
-  getAgencyName(): string {
-    return this.agencyName;
+  getAgency(): string {
+    return this.agency;
   }
 
   /**
    * Sets the agency name.
-   * @param agencyName - The new agency name.
+   * @param agency - The new agency name.
    */
-  setAgencyName(agencyName: string): void {
-    this.agencyName = agencyName;
+  setAgency(agency: string): void {
+    this.agency = agency;
   }
 
   /**
@@ -80,35 +80,35 @@ class Feedback {
   }
 
   /**
-   * Gets the email (if provided).
-   * @returns The email as a string, or undefined if not provided.
+   * Gets the userEmail (if provided).
+   * @returns The userEmail as a string, or undefined if not provided.
    */
-  getEmail(): string | undefined {
-    return this.email;
+  getUserEmail(): string | undefined {
+    return this.userEmail;
   }
 
   /**
-   * Sets the email.
-   * @param email - The new email address.
+   * Sets the userEmail.
+   * @param userEmail - The new userEmail address.
    */
-  setEmail(email: string): void {
-    this.email = email;
+  setUserEmail(userEmail: string): void {
+    this.userEmail = userEmail;
   }
 
   /**
-   * Gets the feedback description.
-   * @returns The feedback description as a string.
+   * Gets the feedback additionalDetails.
+   * @returns The feedback additionalDetails as a string.
    */
-  getDescription(): string {
-    return this.description;
+  getAdditionalDetails(): string {
+    return this.additionalDetails;
   }
 
   /**
-   * Sets the feedback description.
-   * @param description - The new feedback description.
+   * Sets the feedback additionalDetails.
+   * @param additionalDetails - The new feedback additionalDetails.
    */
-  setDescription(description: string): void {
-    this.description = description;
+  setAdditionalDetails(additionalDetails: string): void {
+    this.additionalDetails = additionalDetails;
   }
 }
 
