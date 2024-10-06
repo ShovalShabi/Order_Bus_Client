@@ -33,15 +33,26 @@ const FeedbackPage: React.FC = () => {
 
   // Function to handle form submission
   const handleSubmit = async () => {
-    if (!rating) {
-      // Trigger alert for missing rating
+    // Perform validations
+    if (!lineNumber) {
+      setAlert({ severity: "error", message: "Line Number is required" });
+      return;
+    }
+
+    if (!agencyName) {
+      setAlert({ severity: "error", message: "Agency Name is required" });
+      return;
+    }
+
+    if (!rating || rating < 1) {
       setAlert({
         severity: "error",
-        message: "Please provide a rating",
+        message: "Please provide a rating of at least 1",
       });
       return;
     }
 
+    // Construct Feedback DTO
     const feedback = new Feedback(
       lineNumber,
       agencyName,
@@ -89,7 +100,7 @@ const FeedbackPage: React.FC = () => {
         borderRadius="1.5rem"
         bgcolor={theme.palette.background.paper} // Card background color
         boxShadow="0px 4px 10px rgba(0, 0, 0, 0.1)" // Card shadow
-        textAlign="center" // Center-align the content horizontally
+        textAlign="center"
       >
         <Typography
           fontWeight="bold"
@@ -137,7 +148,6 @@ const FeedbackPage: React.FC = () => {
               name="rating"
               value={rating}
               onChange={(_event, newValue) => setRating(newValue)}
-              // sx={{ textAlign: "left" }} // Align the Rating next to the label
             />
           </Box>
 
