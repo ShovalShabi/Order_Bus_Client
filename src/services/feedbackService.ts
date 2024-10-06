@@ -20,18 +20,27 @@ class FeedbackService implements IFeedbackService {
     const { feedbackURL } = envVariables;
 
     // Define base URL for the feedback API endpoint
-    this.baseUrl = `${feedbackURL}/feedback`;
-    this.axiosInstance = axiosInstance || axios.create();
+    this.baseUrl = `${feedbackURL}`;
+    this.axiosInstance =
+      axiosInstance ||
+      axios.create({
+        baseURL: this.baseUrl,
+        withCredentials: true, // To send cookies or authentication tokens
+        headers: {
+          "Content-Type": "application/json", // Important for sending JSON
+        },
+      });
   }
 
   /**
    * Posts the feedback to the server.
    * @param feedback - The feedback object to be posted.
+   * @param company - The comapny name that the feedback is related to.
    * @returns A promise that resolves when the feedback is successfully posted.
    */
-  async postFeedback(feedback: Feedback): Promise<void> {
+  async postFeedback(feedback: Feedback, comapny: string): Promise<void> {
     try {
-      await this.axiosInstance.post(`${this.baseUrl}`, feedback);
+      await this.axiosInstance.post(`${this.baseUrl}/${comapny}`, feedback);
     } catch (error) {
       throw new Error(`Failed to post feedback: ${error}`);
     }
