@@ -13,10 +13,12 @@ import { useDispatch, useSelector } from "react-redux";
 import { clearRoute, setTravel, State } from "../states/reducer";
 import { IRoute } from "../bounderies/orderBus/IRoute";
 import AppRoutes from "../utils/AppRoutes";
+import getEnvVariables from "../etc/loadVariables";
 
 const PlanRidePage: React.FC = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
+  const { apiGlobalKey } = getEnvVariables();
 
   // Get the travel data from Redux store
   const travelData = useSelector((state: State) => state.lastTravel);
@@ -78,13 +80,23 @@ const PlanRidePage: React.FC = () => {
           const { latitude, longitude } = position.coords;
           try {
             const response = await fetch(
-              `https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${latitude}&longitude=${longitude}&localityLanguage=en`
+              `https://maps.googleapis.com/maps/api/geocode/json?latlng=${latitude},${longitude}&key=${apiGlobalKey}`
             );
             if (!response.ok) {
-              throw new Error("Failed to retrieve city information");
+              throw new Error("Failed to retrieve location information");
             }
             const data = await response.json();
-            setDeparture(data.locality);
+            if (data.status === "OK") {
+              // Extract the formatted address from the API response
+              const address = data.results[0]?.formatted_address;
+              if (address) {
+                setDeparture(address); // Set the departure field to the street address
+              } else {
+                throw new Error("No address found");
+              }
+            } else {
+              throw new Error("Geocoding API error");
+            }
           } catch (error) {
             console.error("Error getting location:", error);
             setDeparture(
@@ -94,7 +106,8 @@ const PlanRidePage: React.FC = () => {
         },
         (error) => {
           console.error("Error getting location:", error);
-        }
+        },
+        { enableHighAccuracy: true, timeout: 15000, maximumAge: 10000 }
       );
     } else {
       alert("Geolocation is not supported by this browser.");
@@ -179,9 +192,7 @@ const PlanRidePage: React.FC = () => {
                 variant="contained"
                 color="primary"
                 onClick={handleSubmit}
-                disabled={
-                  !departure || !destination || !departureTime || !arrivalTime
-                }
+                disabled={!departure || !destination}
                 fullWidth
               >
                 Submit
