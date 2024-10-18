@@ -2,6 +2,7 @@ import { createAction, createReducer } from "@reduxjs/toolkit";
 import ReduxActions from "../utils/ReduxActions";
 import Feedback from "../bounderies/feedback/Feedback";
 import { IRoute } from "../bounderies/orderBus/IRoute";
+import { ILocation } from "../utils/Location";
 
 /**
  * Interface representing the shape of the Redux state.
@@ -37,7 +38,9 @@ interface SerializableRoute {
   summary: string;
   legs: Array<{
     start_address: string;
+    start_coord: ILocation;
     end_address: string;
+    end_coord: ILocation;
     distance: string;
     duration: string;
     steps: Array<{

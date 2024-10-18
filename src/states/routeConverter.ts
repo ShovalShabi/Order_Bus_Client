@@ -1,4 +1,5 @@
 import { SerializableRoute } from "./reducer";
+import { ILocation } from "../utils/Location";
 
 const convertRouteToSerializable = (
   route: google.maps.DirectionsRoute
@@ -7,7 +8,15 @@ const convertRouteToSerializable = (
     summary: route.summary,
     legs: route.legs.map((leg) => ({
       start_address: leg.start_address,
+      start_coord: {
+        latitude: leg.start_location.lat(),
+        longitude: leg.start_location.lng(),
+      } as ILocation, // Convert to ILocation
       end_address: leg.end_address,
+      end_coord: {
+        latitude: leg.start_location.lat(),
+        longitude: leg.start_location.lng(),
+      } as ILocation, // Convert to ILocation
       distance: leg.distance?.text || "",
       duration: leg.duration?.text || "",
       steps: leg.steps.map((step) => ({
