@@ -1,6 +1,6 @@
 import { useMap, useMapsLibrary } from "@vis.gl/react-google-maps";
 import { useEffect, useState } from "react";
-import { IRoute } from "../bounderies/orderBus/IRoute";
+import { IRoute } from "../dto/orderBus/IRoute";
 import {
   Box,
   Typography,

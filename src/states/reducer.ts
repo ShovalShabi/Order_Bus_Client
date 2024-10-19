@@ -1,7 +1,7 @@
 import { createAction, createReducer } from "@reduxjs/toolkit";
 import ReduxActions from "../utils/ReduxActions";
-import Feedback from "../bounderies/feedback/Feedback";
-import { IRoute } from "../bounderies/orderBus/IRoute";
+import Feedback from "../dto/feedback/Feedback";
+import { IRoute } from "../dto/orderBus/IRoute";
 import { ILocation } from "../utils/Location";
 
 /**

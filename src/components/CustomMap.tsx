@@ -9,7 +9,7 @@ import {
 } from "@vis.gl/react-google-maps";
 import getEnvVariables from "../etc/loadVariables";
 import { ILocation } from "../utils/Location";
-import { IRoute } from "../bounderies/orderBus/IRoute";
+import { IRoute } from "../dto/orderBus/IRoute";
 import Direction from "./Direction";
 import { Box, Typography } from "@mui/material";
 

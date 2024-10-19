@@ -1,5 +1,5 @@
 import axios, { AxiosInstance } from "axios";
-import Feedback from "../bounderies/feedback/Feedback";
+import Feedback from "../dto/feedback/Feedback";
 import getEnvVariables from "../etc/loadVariables";
 import { IFeedbackService } from "./IFeedback";
 

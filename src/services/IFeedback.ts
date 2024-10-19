@@ -1,4 +1,4 @@
-import Feedback from "../bounderies/feedback/Feedback";
+import Feedback from "../dto/feedback/Feedback";
 
 /**
  * Interface for the Feedback Service.

@@ -9,7 +9,7 @@ import {
   useMediaQuery,
 } from "@mui/material";
 import FeedbackService from "../services/feedbackService";
-import Feedback from "../bounderies/feedback/Feedback";
+import Feedback from "../dto/feedback/Feedback";
 import useAlert from "../hooks/useAlert"; // Import the custom alert hook
 
 // FeedbackPage component

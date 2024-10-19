@@ -11,7 +11,7 @@ import {
 import { useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { clearRoute, setTravel, State } from "../states/reducer";
-import { IRoute } from "../bounderies/orderBus/IRoute";
+import { IRoute } from "../dto/orderBus/IRoute";
 import AppRoutes from "../utils/AppRoutes";
 import getEnvVariables from "../etc/loadVariables";
 

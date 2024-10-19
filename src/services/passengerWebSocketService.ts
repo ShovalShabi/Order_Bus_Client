@@ -1,7 +1,7 @@
 import { WebSocketOptions } from "../utils/WebSocketOptions";
 import getEnvVariables from "../etc/loadVariables";
 import { ILocation } from "../utils/Location";
-import PassengerWSMessage from "../bounderies/websocket/PassengerWSMessage";
+import PassengerWSMessage from "../dto/websocket/PassengerWSMessage";
 import { SerializableRoute } from "../states/reducer";
 
 // WebSocket service object
