@@ -3,23 +3,28 @@ import { useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { Box, Button, Container, Divider, Typography } from "@mui/material";
 import CustomMap from "../components/CustomMap";
-import { State } from "../states/reducer";
+import { SerializableRoute, State } from "../states/reducer";
 import AppRoutes from "../utils/AppRoutes";
 import passengerWebSocketService from "../services/passengerWebSocketService";
 import { ILocation } from "../utils/Location";
+import { IRoute } from "../dto/orderBus/IRoute";
 
 export default function ChooseRidePage() {
   const navigate = useNavigate();
-  const { travelData, routeData } = useSelector((state: State) => ({
-    travelData: state.lastTravel,
-    routeData: state.route,
-  }));
+  const routeData: SerializableRoute | null = useSelector(
+    (state: State) => state.route
+  );
+
+  const travelData: IRoute | null = useSelector(
+    (state: State) => state.lastTravel
+  );
+
   const [isBusOnTheWay, setIsBusOnTheWay] = useState(false);
 
   useEffect(() => {
     if (!travelData) {
-      navigate(AppRoutes.PLAN_RIDE_PAGE);
       passengerWebSocketService.disconnect();
+      navigate(AppRoutes.PLAN_RIDE_PAGE);
       return;
     }
 
@@ -43,10 +48,12 @@ export default function ChooseRidePage() {
       passengerWebSocketService.startPing(routeData);
     }
 
-    // Clean up on unmount
+    // Clean up the WebSocket connection only on navigation
     return () => {
-      console.log("disconnected from server");
-      passengerWebSocketService.disconnect();
+      if (location.pathname !== AppRoutes.CHOOSE_RIDE_PAGE) {
+        console.log("Navigation occurred, disconnecting WebSocket");
+        passengerWebSocketService.disconnect();
+      }
     };
   }, [travelData, routeData, navigate]);
 
