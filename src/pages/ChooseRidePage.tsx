@@ -1,7 +1,15 @@
 import { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
-import { Box, Button, Container, Divider, Typography } from "@mui/material";
+import {
+  Box,
+  Button,
+  Container,
+  Divider,
+  Typography,
+  useMediaQuery,
+  useTheme,
+} from "@mui/material";
 import CustomMap from "../components/CustomMap";
 import { SerializableRoute, State } from "../states/reducer";
 import AppRoutes from "../utils/AppRoutes";
@@ -11,6 +19,9 @@ import { IRoute } from "../dto/orderBus/IRoute";
 
 export default function ChooseRidePage() {
   const navigate = useNavigate();
+  const theme = useTheme(); // Get theme from Material-UI
+  const isNonMobileScreens = useMediaQuery("(min-width: 1000px)"); // Media query for screen size
+
   const routeData: SerializableRoute | null = useSelector(
     (state: State) => state.route
   );
@@ -93,65 +104,91 @@ export default function ChooseRidePage() {
   };
 
   return (
-    <Container
-      maxWidth="xl"
-      sx={{ height: "100vh", display: "flex", flexDirection: "column" }}
+    <Box
+      display="flex"
+      justifyContent="center"
+      alignItems="center"
+      minHeight="100vh"
+      bgcolor="rgba(0, 0, 0, 0.1)" // Light background for the page
     >
-      <Typography variant="h4" sx={{ my: 2 }}>
-        Choose Your Ride
-      </Typography>
-
-      <Box sx={{ display: "flex", flex: 1, overflow: "hidden" }}>
-        <Box sx={{ flex: 1 }}>
-          {travelData && (
-            <CustomMap
-              origin={travelData.origin}
-              destination={travelData.destination}
-              departureTime={travelData.departureTime}
-              arrivalTime={travelData.arrivalTime}
-            />
-          )}
-        </Box>
-      </Box>
-
-      <Divider sx={{ my: 2 }} />
-
       <Box
-        sx={{
-          display: "flex",
-          justifyContent: "center",
-          alignItems: "center",
-          p: 2,
-          backgroundColor: "#3FA2F6",
-        }}
+        width={isNonMobileScreens ? "85%" : "95%"} // Set the width to maintain layout
+        height="auto" // Adjust height to content
+        p="2rem"
+        borderRadius="1.5rem"
+        bgcolor={theme.palette.background.paper} // Card-like background
+        boxShadow="0px 4px 10px rgba(0, 0, 0, 0.1)" // Light shadow for the card
       >
-        <Button
-          variant="contained"
-          color="secondary"
-          onClick={handleGoBack}
-          sx={{ mx: 2 }}
+        <Container
+          maxWidth="xl"
+          sx={{ display: "flex", flexDirection: "column", height: "100%" }}
         >
-          Go Back
-        </Button>
-        <Button
-          variant="contained"
-          color="primary"
-          onClick={handleOrderBus}
-          sx={{ mx: 2 }}
-        >
-          Order Bus
-        </Button>
-        {isBusOnTheWay && (
-          <Button
-            variant="contained"
-            color="error"
-            onClick={handleCancelRide}
-            sx={{ mx: 2 }}
+          <Typography
+            variant="h2"
+            fontWeight="bold"
+            color={theme.palette.primary.main}
+            mb="2rem"
+            textAlign="center"
           >
-            Cancel Ride
-          </Button>
-        )}
+            Choose Your Ride
+          </Typography>
+
+          <Box sx={{ display: "flex", flex: 1, overflow: "hidden" }}>
+            <Box sx={{ flex: 1, height: "60vh" }}>
+              {travelData && (
+                <CustomMap
+                  origin={travelData.origin}
+                  destination={travelData.destination}
+                  departureTime={travelData.departureTime}
+                  arrivalTime={travelData.arrivalTime}
+                />
+              )}
+            </Box>
+          </Box>
+
+          <Divider sx={{ my: 2 }} />
+
+          <Box
+            sx={{
+              display: "flex",
+              justifyContent: "center",
+              alignItems: "center",
+              p: 2,
+              backgroundColor: theme.palette.primary.light, // Keep the background consistent with the theme
+            }}
+          >
+            <Button
+              variant="contained"
+              color="secondary"
+              onClick={handleGoBack}
+              sx={{ mx: 2 }}
+              fullWidth={isNonMobileScreens ? false : true} // Full-width on mobile screens
+            >
+              Go Back
+            </Button>
+            <Button
+              variant="contained"
+              color="primary"
+              onClick={handleOrderBus}
+              sx={{ mx: 2 }}
+              fullWidth={isNonMobileScreens ? false : true} // Full-width on mobile screens
+            >
+              Order Bus
+            </Button>
+            {isBusOnTheWay && (
+              <Button
+                variant="contained"
+                color="error"
+                onClick={handleCancelRide}
+                sx={{ mx: 2 }}
+                fullWidth={isNonMobileScreens ? false : true} // Full-width on mobile screens
+              >
+                Cancel Ride
+              </Button>
+            )}
+          </Box>
+        </Container>
       </Box>
-    </Container>
+    </Box>
   );
 }
