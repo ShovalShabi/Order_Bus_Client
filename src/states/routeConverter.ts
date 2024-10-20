@@ -21,6 +21,14 @@ const convertRouteToSerializable = (
       duration: leg.duration?.text || "",
       steps: leg.steps.map((step) => ({
         travel_mode: step.travel_mode,
+        start_location: {
+          latitude: step.start_location.lat(),
+          longitude: step.start_location.lng(),
+        } as ILocation, // Convert to ILocation,
+        end_location: {
+          latitude: step.end_location.lat(),
+          longitude: step.end_location.lng(),
+        } as ILocation, // Convert to ILocation,,
         instructions: step.instructions || "",
         distance: step.distance?.text || "",
         duration: step.duration?.text || "",

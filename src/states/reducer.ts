@@ -32,6 +32,19 @@ interface State {
 export type { State };
 
 /**
+ * Interface representing the shape of custom step parameter within leg.
+ */
+export interface CustomStep {
+  travel_mode: string;
+  start_location: ILocation;
+  end_location: ILocation;
+  instructions: string;
+  distance: string;
+  duration: string;
+  lineNumber?: string;
+}
+
+/**
  * Interface representing the shape of the Redux route parameter.
  */
 interface SerializableRoute {
@@ -43,13 +56,7 @@ interface SerializableRoute {
     end_coord: ILocation;
     distance: string;
     duration: string;
-    steps: Array<{
-      travel_mode: string;
-      instructions: string;
-      distance: string;
-      duration: string;
-      lineNumber?: string; // Optional since not all steps may have a line number
-    }>;
+    steps: Array<CustomStep>;
   }>;
 }
 
