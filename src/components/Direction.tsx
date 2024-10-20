@@ -12,7 +12,7 @@ import {
 } from "@mui/material";
 import { ExpandLess, ExpandMore } from "@mui/icons-material";
 import { useDispatch } from "react-redux";
-import { setRoute } from "../states/reducer";
+import { clearRoute, setRoute } from "../states/reducer";
 import convertRouteToSerializable from "../states/routeConverter";
 
 const Direction = ({
@@ -28,11 +28,12 @@ const Direction = ({
   const [directionsRenderer, setDirectionsRenderer] =
     useState<google.maps.DirectionsRenderer | null>(null);
   const [routes, setRoutes] = useState<google.maps.DirectionsRoute[]>([]);
-  const [routeIndex, setRouteIndex] = useState(0);
-  const [open, setOpen] = useState(false); // State for managing dropdown visibility
+  const [routeIndex, setRouteIndex] = useState<number>(-1);
+  const [open, setOpen] = useState<number | null>(null); // To manage open/close per item
 
   const dispatch = useDispatch();
 
+  // Update selectedRoute based on routeIndex
   const selectedRoute = routes[routeIndex] || null;
   const leg = selectedRoute?.legs[0] || null;
 
@@ -112,12 +113,20 @@ const Direction = ({
   }, [routeIndex, directionsRenderer, routes.length]);
 
   const handleRouteClick = (index: number) => {
-    setRouteIndex(index);
-    setOpen((prevOpen) => (index === routeIndex ? !prevOpen : true));
-
-    if (selectedRoute) {
-      const serializableRoute = convertRouteToSerializable(selectedRoute);
-      dispatch(setRoute(serializableRoute));
+    if (index === routeIndex) {
+      // If the same route is clicked, toggle open state and clear route
+      setRouteIndex(-1); // Deselect the current route
+      setOpen(null); // Close the dropdown
+      dispatch(clearRoute()); // Clear the selected route from the state
+    } else {
+      // If a different route is clicked, select the new route
+      setRouteIndex(index);
+      setOpen(index); // Open the dropdown for the selected route
+      const selectedRoute = routes[index];
+      if (selectedRoute) {
+        const serializableRoute = convertRouteToSerializable(selectedRoute);
+        dispatch(setRoute(serializableRoute)); // Dispatch the new route
+      }
     }
   };
 
@@ -155,14 +164,10 @@ const Direction = ({
             <ListItem disablePadding>
               <ListItemButton onClick={() => handleRouteClick(index)}>
                 <ListItemText primary={route.summary || `Route ${index + 1}`} />
-                {open && index === routeIndex ? <ExpandLess /> : <ExpandMore />}
+                {open === index ? <ExpandLess /> : <ExpandMore />}
               </ListItemButton>
             </ListItem>
-            <Collapse
-              in={open && index === routeIndex}
-              timeout="auto"
-              unmountOnExit
-            >
+            <Collapse in={open === index} timeout="auto" unmountOnExit>
               <List component="div" disablePadding sx={{ pl: 4 }}>
                 {route.legs[0].steps.map((step, stepIndex) => (
                   <ListItem key={stepIndex}>
