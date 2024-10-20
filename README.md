@@ -150,3 +150,5 @@ Ensure that the backend services are running before starting the frontend in Doc
 ## Contact
 
 If you encounter any issues or have questions about the project, feel free to reach out via email to [shovalshabi@gmail.com](mailto:shovalshabi@gmail.com?subject=Request%20for%20ENV%20files) and [tamir303@gmail.com](mailto:tamir303@gmail.com?subject=Request%20for%20ENV%20files).
+
+#### © All rights reserved to Shoval Shabi and Tamir Spilberg
