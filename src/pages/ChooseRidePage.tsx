@@ -1,3 +1,16 @@
+/**
+ * ChooseRidePage component allows users to view and select a ride, interact with WebSocket services,
+ * and manage the process of ordering or canceling a bus ride. It also provides feedback via the
+ * useAlert hook and displays success/failure notifications.
+ *
+ * @component
+ * @returns {JSX.Element} Rendered component for choosing a ride.
+ *
+ * @example
+ * <ChooseRidePage />
+ */
+
+// React, Redux, Material-UI, and service imports
 import { useEffect, useState, useRef } from "react";
 import { useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
@@ -22,15 +35,24 @@ import AppRoutes from "../utils/AppRoutes";
 import passengerWebSocketService from "../services/passengerWebSocketService";
 import { ILocation } from "../utils/Location";
 import { IRoute } from "../dto/orderBus/IRoute";
-import useAlert from "../hooks/useAlert"; // Importing the alert hook
+import useAlert from "../hooks/useAlert";
 import extractFirstStepAsTransit from "../utils/extractFirstStepAsTransit";
 
+/**
+ * ChooseRidePage React component
+ * Handles WebSocket connection to order or cancel a bus ride and manages UI states such as loading
+ * indicators and success/error icons. It also displays the map with relevant ride information.
+ *
+ * @returns {JSX.Element} The rendered JSX element for the ChooseRidePage component.
+ */
 export default function ChooseRidePage() {
+  // Navigation for handling page transitions
   const navigate = useNavigate();
-  const theme = useTheme(); // Get theme from Material-UI
+  const theme = useTheme(); // Get the theme
   const isNonMobileScreens = useMediaQuery("(min-width: 1000px)"); // Media query for screen size
-  const { setAlert } = useAlert(); // Using custom alert hook
+  const { setAlert } = useAlert(); // Custom hook for displaying alerts
 
+  // Fetch selected route and travel data from Redux store
   const routeData: SerializableRoute | null = useSelector(
     (state: State) => state.route
   );
@@ -39,15 +61,18 @@ export default function ChooseRidePage() {
     (state: State) => state.lastTravel
   );
 
+  // Component state hooks for handling bus status, loading states, and icons
   const [isBusOnTheWay, setIsBusOnTheWay] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [showIcon, setShowIcon] = useState<"success" | "error" | null>(null); // Control icon visibility
-  const timer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
+  const [showIcon, setShowIcon] = useState<"success" | "error" | null>(null); // Show success/error icons
+  const timer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined); // Timer for handling timeouts
 
+  // Effect to set the document title on page load
   useEffect(() => {
     document.title = "Choose Your Ride";
   }, []);
 
+  // WebSocket and event handling effect
   useEffect(() => {
     if (!travelData) {
       passengerWebSocketService.disconnect();
@@ -55,10 +80,10 @@ export default function ChooseRidePage() {
       return;
     }
 
-    // Connect to WebSocket when the component mounts
+    // Establish WebSocket connection
     passengerWebSocketService.connect();
 
-    // Handle bus accepted event
+    // Event: Bus accepted by a driver
     passengerWebSocketService.onBusAccepted = () => {
       setIsBusOnTheWay(true);
       setLoading(false);
@@ -68,14 +93,13 @@ export default function ChooseRidePage() {
         severity: "success",
       });
 
-      // Fade away success icon after 2 seconds
+      // Hide success icon after 2 seconds
       setTimeout(() => setShowIcon(null), 2000);
     };
 
-    // Handle ride canceled event
+    // Event: Ride canceled by driver
     passengerWebSocketService.onRideCanceled = () => {
       setIsBusOnTheWay(false);
-      // Set alert with a hyperlink for feedback
       setAlert({
         message: (
           <span>
@@ -95,12 +119,12 @@ export default function ChooseRidePage() {
       });
     };
 
-    // Start the ping mechanism with routeData
+    // Start ping mechanism with route data
     if (routeData) {
       passengerWebSocketService.startPing(routeData);
     }
 
-    // Clean up the WebSocket connection only on navigation
+    // Clean up WebSocket connection on navigation
     return () => {
       if (location.pathname !== AppRoutes.CHOOSE_RIDE_PAGE) {
         console.log("Navigation occurred, disconnecting WebSocket");
@@ -109,14 +133,18 @@ export default function ChooseRidePage() {
     };
   }, [travelData, routeData, navigate, setAlert]);
 
+  /**
+   * Handles ordering a bus by sending a WebSocket message. Displays a loading state and waits for a driver response.
+   */
   const handleOrderBus = () => {
     if (routeData) {
-      setShowIcon(null); // Reset icon
+      setShowIcon(null); // Reset icons
       setLoading(true);
 
-      const step = extractFirstStepAsTransit(routeData); // the first step that involves tranist transportation
+      // Extract the first transit step from the route data
+      const step = extractFirstStepAsTransit(routeData);
 
-      // Send the order bus request
+      // Send bus order via WebSocket
       passengerWebSocketService.orderBus(
         step?.start_location as ILocation,
         step?.end_location as ILocation
@@ -127,7 +155,7 @@ export default function ChooseRidePage() {
         severity: "info",
       });
 
-      // Start a timer for 1 minute to simulate the waiting time
+      // Set a timer for 1 minute to simulate waiting for a response
       timer.current = setTimeout(() => {
         setLoading(false);
         if (!isBusOnTheWay) {
@@ -143,25 +171,31 @@ export default function ChooseRidePage() {
                   underline="always"
                   onClick={() => navigate(AppRoutes.FILL_RIDE_EXPERIENCE)}
                 >
-                  Share with us your ride experince.
+                  Share with us your ride experience.
                 </Link>
               </span>
             ),
             severity: "error",
           });
 
-          // Fade away error icon after 2 seconds
+          // Hide error icon after 2 seconds
           setTimeout(() => setShowIcon(null), 2000);
         }
       }, 60000); // 1 minute
     }
   };
 
+  /**
+   * Handles the "Go Back" button click, navigates to the ride planning page.
+   */
   const handleGoBack = () => {
     if (loading) handleCancelRide();
     navigate(AppRoutes.PLAN_RIDE_PAGE);
   };
 
+  /**
+   * Cancels the bus ride if ordered and updates the state accordingly.
+   */
   const handleCancelRide = () => {
     if (routeData) {
       passengerWebSocketService.cancelBus(
@@ -185,12 +219,12 @@ export default function ChooseRidePage() {
       bgcolor="rgba(0, 0, 0, 0.1)" // Light background for the page
     >
       <Box
-        width={isNonMobileScreens ? "85%" : "95%"} // Set the width to maintain layout
-        height="auto" // Adjust height to content
+        width={isNonMobileScreens ? "85%" : "95%"} // Set width according to screen size
+        height="auto"
         p="2rem"
         borderRadius="1.5rem"
-        bgcolor={theme.palette.background.paper} // Card-like background
-        boxShadow="0px 4px 10px rgba(0, 0, 0, 0.1)" // Light shadow for the card
+        bgcolor={theme.palette.background.paper}
+        boxShadow="0px 4px 10px rgba(0, 0, 0, 0.1)"
       >
         <Container
           maxWidth="xl"
@@ -224,34 +258,32 @@ export default function ChooseRidePage() {
           <Box
             sx={{
               display: "flex",
-              justifyContent: "space-between", // Spread buttons evenly
+              justifyContent: "space-between",
               alignItems: "center",
               p: 2,
-              backgroundColor: theme.palette.primary.light, // Consistent background color
-              gap: 2, // Space between buttons
+              backgroundColor: theme.palette.primary.light,
+              gap: 2,
             }}
           >
             <Button
               variant="contained"
               color="secondary"
               onClick={handleGoBack}
-              sx={{ flex: 1, mx: 1 }} // Equal space for "Go Back" button
-              fullWidth={isNonMobileScreens ? false : true} // Full-width on mobile screens
+              sx={{ flex: 1, mx: 1 }}
+              fullWidth={isNonMobileScreens ? false : true}
             >
               Go Back
             </Button>
 
-            {/* Order Bus Button with Circular Progress and Icon */}
             <Button
               variant="contained"
               color="primary"
               onClick={handleOrderBus}
-              disabled={loading || showIcon !== null} // Disable when loading or icon is shown
+              disabled={loading || showIcon !== null}
               fullWidth
-              sx={{ flex: 1, position: "relative", mx: 1 }} // Ensure full width and relative positioning for the icon/progress
+              sx={{ flex: 1, position: "relative", mx: 1 }}
             >
               {loading ? "Ordering..." : "Order Bus"}
-
               {loading && (
                 <CircularProgress
                   size={24}
@@ -265,7 +297,6 @@ export default function ChooseRidePage() {
                   }}
                 />
               )}
-
               <Fade in={showIcon === "success"}>
                 <CheckCircleIcon
                   sx={{
@@ -278,7 +309,6 @@ export default function ChooseRidePage() {
                   }}
                 />
               </Fade>
-
               <Fade in={showIcon === "error"}>
                 <ErrorIcon
                   sx={{
@@ -293,15 +323,14 @@ export default function ChooseRidePage() {
               </Fade>
             </Button>
 
-            {/* Cancel Ride Button (Only shown when the bus is on the way) */}
             {isBusOnTheWay && (
               <Fade in={isBusOnTheWay}>
                 <Button
                   variant="contained"
                   color="error"
                   onClick={handleCancelRide}
-                  sx={{ flex: 1, mx: 1 }} // Equal space for "Cancel Ride" button
-                  fullWidth={isNonMobileScreens ? false : true} // Full-width on mobile screens
+                  sx={{ flex: 1, mx: 1 }}
+                  fullWidth={isNonMobileScreens ? false : true}
                 >
                   Cancel Ride
                 </Button>

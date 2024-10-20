@@ -4,16 +4,25 @@ import { ILocation } from "../utils/Location";
 import PassengerWSMessage from "../dto/websocket/PassengerWSMessage";
 import { SerializableRoute } from "../states/reducer";
 
-// WebSocket service object
+/**
+ * WebSocket service for passenger communication with the backend server.
+ * Handles establishing WebSocket connections, sending requests for ordering or canceling a bus,
+ * maintaining keep-alive ping messages, and handling reconnection logic.
+ */
 const passengerWebSocketService = {
-  websocket: null as WebSocket | null,
-  webSocketOrderBusServiceURL: getEnvVariables().webSocketOrderBusServiceURL,
-  reconnectInterval: 5000,
-  pingInterval: 10000,
-  pingTimeoutId: null as NodeJS.Timeout | null,
-  reconnectTimeoutId: null as NodeJS.Timeout | null,
+  websocket: null as WebSocket | null, // Holds the WebSocket instance
+  webSocketOrderBusServiceURL: getEnvVariables().webSocketOrderBusServiceURL, // WebSocket server URL
+  reconnectInterval: 5000, // Reconnection interval in milliseconds
+  pingInterval: 10000, // Ping interval in milliseconds
+  pingTimeoutId: null as NodeJS.Timeout | null, // Timeout ID for the ping messages
+  reconnectTimeoutId: null as NodeJS.Timeout | null, // Timeout ID for reconnections
   shouldReconnect: true, // Flag to control reconnection behavior
 
+  /**
+   * Establishes a WebSocket connection to the server.
+   * Ensures that multiple simultaneous connections are avoided.
+   * Sets up event listeners for `onopen`, `onmessage`, `onclose`, and `onerror` WebSocket events.
+   */
   connect() {
     if (
       this.websocket &&
@@ -70,6 +79,10 @@ const passengerWebSocketService = {
     };
   },
 
+  /**
+   * Disconnects the WebSocket connection.
+   * Prevents reconnection after intentional disconnection.
+   */
   disconnect() {
     if (this.websocket) {
       if (this.websocket.readyState === WebSocket.CONNECTING) return;
@@ -88,6 +101,12 @@ const passengerWebSocketService = {
     }
   },
 
+  /**
+   * Sends a message through the WebSocket connection.
+   * If the WebSocket is not open, it logs an error.
+   *
+   * @param {PassengerWSMessage} message - The message to send via WebSocket.
+   */
   sendMessage(message: PassengerWSMessage) {
     if (!this.websocket || this.websocket.readyState !== WebSocket.OPEN) {
       console.error("WebSocket is not open. Cannot send message");
@@ -97,6 +116,12 @@ const passengerWebSocketService = {
     console.log("Message sent:", message);
   },
 
+  /**
+   * Sends an order bus request via WebSocket.
+   *
+   * @param {ILocation} startLocation - The starting location of the passenger.
+   * @param {ILocation} endLocation - The destination location of the passenger.
+   */
   orderBus(startLocation: ILocation, endLocation: ILocation) {
     const message: PassengerWSMessage = {
       startLocation,
@@ -107,6 +132,12 @@ const passengerWebSocketService = {
     this.sendMessage(message);
   },
 
+  /**
+   * Sends a cancel bus request via WebSocket.
+   *
+   * @param {ILocation} startLocation - The starting location of the passenger.
+   * @param {ILocation} endLocation - The destination location of the passenger.
+   */
   cancelBus(startLocation: ILocation, endLocation: ILocation) {
     const message: PassengerWSMessage = {
       startLocation,
@@ -117,6 +148,9 @@ const passengerWebSocketService = {
     this.sendMessage(message);
   },
 
+  /**
+   * Schedules a reconnection attempt if the WebSocket connection is closed.
+   */
   scheduleReconnect() {
     console.log(
       `Attempting to reconnect in ${this.reconnectInterval / 1000} seconds...`
@@ -126,6 +160,11 @@ const passengerWebSocketService = {
     }, this.reconnectInterval);
   },
 
+  /**
+   * Starts sending ping messages at regular intervals to keep the connection alive.
+   *
+   * @param {SerializableRoute} routeData - The route data to send in ping messages.
+   */
   startPing(routeData: SerializableRoute) {
     const message: PassengerWSMessage = {
       startLocation: routeData.legs[0].start_coord,
@@ -142,6 +181,9 @@ const passengerWebSocketService = {
     }, this.pingInterval);
   },
 
+  /**
+   * Stops sending ping messages.
+   */
   stopPing() {
     if (this.pingTimeoutId) {
       clearInterval(this.pingTimeoutId);
@@ -149,7 +191,7 @@ const passengerWebSocketService = {
     }
   },
 
-  // Custom event handlers
+  // Custom event handlers to be implemented by consuming components
   onBusAccepted() {},
   onRideCanceled() {},
 };

@@ -7,13 +7,13 @@ services:  # Definitions of services to be run
       context: .  # Build context is the current directory
       dockerfile: Dockerfile  # Specifies the Dockerfile to use for building the image
     ports:  # Specifies ports to expose from the container to the host machine
-      - "8080"  # Maps port 8081 of the container to a random port on the host machine
+      - "7001:7001"  # Maps port 7001 of the container to port 7001 on the host machine
     command: npm run prod -- --host  # Command to run when the container starts for production, --host expose the host port to the network
 
   nginx:  # Service for the Nginx server
     image: nginx:alpine  # Specifies the Docker image to use for the Nginx service
     ports:  # Specifies ports to expose from the container to the host machine
-      - "8080:8080"  # Maps port 8080 of the container to port 8080 on the host machine
+      - "8082:8082"  # Maps port 8082 of the container to port 8082 on the host machine
     volumes:  # Specifies volumes to mount from the host machine into the container
       - ./nginx.conf:/etc/nginx/nginx.conf//:ro  # Mounts the nginx.conf file to the Nginx configuration directory and makes the file in read-only mode
     depends_on:  # Specifies dependencies for this service
@@ -24,7 +24,7 @@ services:  # Definitions of services to be run
       context: .  
       dockerfile: Dockerfile 
     ports:  
-      - "3001:3001"
+      - "6001:6001"
     command: npm run dev -- --host
 
   test:  # Service for the test environment

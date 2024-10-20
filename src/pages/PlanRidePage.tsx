@@ -1,3 +1,19 @@
+/**
+ * PlanRidePage component
+ *
+ * This component allows users to plan their bus ride by selecting the departure point, destination,
+ * and desired departure/arrival times. The user can also auto-fill their current location as the
+ * departure point using the "Locate Me" feature.
+ *
+ * The planned route is then saved in the Redux store, and the user is navigated to the "Choose Ride" page.
+ *
+ * @component
+ * @returns {JSX.Element} The rendered JSX element for the PlanRidePage component.
+ *
+ * @example
+ * <PlanRidePage />
+ */
+
 import React, { useEffect, useState } from "react";
 import {
   TextField,
@@ -16,49 +32,58 @@ import { IRoute } from "../dto/orderBus/IRoute";
 import AppRoutes from "../utils/AppRoutes";
 import getEnvVariables from "../etc/loadVariables";
 
+/**
+ * PlanRidePage component for planning a bus ride.
+ * Allows users to input a departure and destination, as well as departure/arrival times.
+ * The user can use the "Locate Me" feature to automatically populate the current location as the departure point.
+ *
+ * @returns {JSX.Element} The rendered PlanRidePage component.
+ */
 const PlanRidePage: React.FC = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
-  const { apiGlobalKey } = getEnvVariables();
+  const { apiGlobalKey } = getEnvVariables(); // Retrieve environment variables
 
-  // Get theme and media query from Material-UI
-  const theme = useTheme();
-  const isNonMobileScreens = useMediaQuery("(min-width: 1000px)");
+  const theme = useTheme(); // Material-UI theme hook
+  const isNonMobileScreens = useMediaQuery("(min-width: 1000px)"); // Check screen size for responsiveness
 
-  // Get the travel data from Redux store
+  // Fetch previous travel data from Redux store if available
   const travelData = useSelector((state: State) => state.lastTravel);
 
-  // Set initial state based on Redux store or default to empty strings
+  // State to manage departure and destination input
   const [departure, setDeparture] = useState<string>(travelData?.origin || "");
   const [destination, setDestination] = useState<string>(
     travelData?.destination || ""
   );
 
-  useEffect(() => {
-    document.title = "Plan Your Ride";
-  }, []);
-
+  // State for departure and arrival times, initialized from Redux store or set to empty strings
   const [departureTime, setDepartureTime] = useState<string>(() => {
     if (travelData?.departureTime) {
-      // If departureTime is not null, format it as a string
       return new Date(travelData.departureTime).toTimeString().slice(0, 5);
     }
-    // Return an empty string if departureTime is null
     return "";
   });
 
   const [arrivalTime, setArrivalTime] = useState<string>(() => {
     if (travelData?.arrivalTime) {
-      // If arrivalTime is not null, format it as a string
       return new Date(travelData.arrivalTime).toTimeString().slice(0, 5);
     }
-    // Return an empty string if arrivalTime is null
     return "";
   });
 
+  // Set the document title for the page
+  useEffect(() => {
+    document.title = "Plan Your Ride";
+  }, []);
+
+  /**
+   * Handles the form submission, combining the selected date with the selected departure/arrival times,
+   * and dispatches the travel information to Redux before navigating to the ChooseRidePage.
+   */
   const handleSubmit = async () => {
-    // Combine the current date with the selected time
     const currentDate = new Date();
+
+    // Combine date with the selected departure and arrival times
     const combinedDepartureTime = new Date(
       `${currentDate.toDateString()} ${departureTime}`
     ).toLocaleString();
@@ -66,7 +91,7 @@ const PlanRidePage: React.FC = () => {
       `${currentDate.toDateString()} ${arrivalTime}`
     ).toLocaleString();
 
-    // Create RouteRequestBoundary
+    // Create a route request object
     const routeRequest: IRoute = {
       origin: departure,
       destination: destination,
@@ -76,12 +101,15 @@ const PlanRidePage: React.FC = () => {
 
     console.log(routeRequest);
 
-    dispatch(clearRoute());
-    // Store the last travel in Redux state
-    dispatch(setTravel(routeRequest));
-    navigate(AppRoutes.CHOOSE_RIDE_PAGE);
+    dispatch(clearRoute()); // Clear any previous route data in Redux
+    dispatch(setTravel(routeRequest)); // Save the travel information in Redux
+    navigate(AppRoutes.CHOOSE_RIDE_PAGE); // Navigate to ChooseRidePage
   };
 
+  /**
+   * Uses the Geolocation API to retrieve the user's current location and auto-populates
+   * the "Departure" field with a formatted address using the Google Geocoding API.
+   */
   const handleLocateMe = () => {
     if (navigator.geolocation) {
       navigator.geolocation.getCurrentPosition(
@@ -96,10 +124,9 @@ const PlanRidePage: React.FC = () => {
             }
             const data = await response.json();
             if (data.status === "OK") {
-              // Extract the formatted address from the API response
               const address = data.results[0]?.formatted_address;
               if (address) {
-                setDeparture(address); // Set the departure field to the street address
+                setDeparture(address); // Set the formatted address as the departure location
               } else {
                 throw new Error("No address found");
               }
@@ -110,7 +137,7 @@ const PlanRidePage: React.FC = () => {
             console.error("Error getting location:", error);
             setDeparture(
               `Lat: ${latitude.toFixed(6)}, Long: ${longitude.toFixed(6)}`
-            );
+            ); // Fallback to coordinates
           }
         },
         (error) => {
@@ -129,13 +156,13 @@ const PlanRidePage: React.FC = () => {
       justifyContent="center"
       alignItems="center"
       minHeight="100vh"
-      bgcolor="rgba(0, 0, 0, 0.1)" // Light background for the page
+      bgcolor="rgba(0, 0, 0, 0.1)" // Light background
     >
       <Box
-        width={isNonMobileScreens ? "50%" : "93%"} // Adjust width based on screen size
+        width={isNonMobileScreens ? "50%" : "93%"} // Adjust width for larger screens
         p="2rem"
         borderRadius="1.5rem"
-        bgcolor={theme.palette.background.paper} // Card background
+        bgcolor={theme.palette.background.paper} // Card-like appearance
         boxShadow="0px 4px 10px rgba(0, 0, 0, 0.1)" // Light shadow for the card
       >
         <Box
@@ -144,6 +171,7 @@ const PlanRidePage: React.FC = () => {
           alignItems="center"
           justifyContent="center"
         >
+          {/* Animated Title */}
           <Grow in timeout={1000}>
             <Typography
               variant="h2"
@@ -155,6 +183,7 @@ const PlanRidePage: React.FC = () => {
             </Typography>
           </Grow>
 
+          {/* Form Fields */}
           <Grow in timeout={1500}>
             <Grid container spacing={2}>
               <Grid item xs={12}>
@@ -224,7 +253,7 @@ const PlanRidePage: React.FC = () => {
                   variant="contained"
                   color="primary"
                   onClick={handleSubmit}
-                  disabled={!departure || !destination}
+                  disabled={!departure || !destination} // Disable button if fields are empty
                   fullWidth
                 >
                   Submit

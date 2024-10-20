@@ -19,28 +19,40 @@ import DirectionsWalkIcon from "@mui/icons-material/DirectionsWalk";
 import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
 import DirectionsBusIcon from "@mui/icons-material/DirectionsBus";
 
+/**
+ * @function Direction
+ * React component that fetches and renders directions for transit routes (bus routes) using Google Maps services.
+ * Allows users to view alternative routes, toggle them, and get detailed step information.
+ *
+ * @param {IRoute} props - The route details including origin, destination, departureTime, and arrivalTime.
+ *
+ * @returns {JSX.Element} - The rendered transit route information.
+ */
 const Direction = ({
   origin,
   destination,
   departureTime,
   arrivalTime,
 }: IRoute) => {
-  const map = useMap();
-  const routesLibrary = useMapsLibrary("routes");
+  const map = useMap(); // Access the map instance
+  const routesLibrary = useMapsLibrary("routes"); // Access Google Maps routes service
   const [directionsService, setDirectionsService] =
     useState<google.maps.DirectionsService | null>(null);
   const [directionsRenderer, setDirectionsRenderer] =
     useState<google.maps.DirectionsRenderer | null>(null);
   const [routes, setRoutes] = useState<google.maps.DirectionsRoute[]>([]);
   const [routeIndex, setRouteIndex] = useState<number>(-1);
-  const [open, setOpen] = useState<number | null>(null); // To manage open/close per item
+  const [open, setOpen] = useState<number | null>(null); // Manage dropdown open/close per item
 
   const dispatch = useDispatch();
 
-  // Update selectedRoute based on routeIndex
+  // Update selected route based on routeIndex
   const selectedRoute = routes[routeIndex] || null;
   const leg = selectedRoute?.legs[0] || null;
 
+  /**
+   * @useEffect Initializes the Google Maps DirectionsService and DirectionsRenderer when the map or routes library is ready.
+   */
   useEffect(() => {
     if (!routesLibrary || !map) {
       console.log("Google Maps library or map instance is not available yet.");
@@ -56,6 +68,10 @@ const Direction = ({
     console.log("DirectionsService and DirectionsRenderer initialized.");
   }, [routesLibrary, map]);
 
+  /**
+   * @useEffect Fetches the transit routes between the origin and destination when the directions service is ready.
+   * Filters only the bus routes and sorts them by duration.
+   */
   useEffect(() => {
     if (!directionsService || !directionsRenderer) return;
 
@@ -68,12 +84,13 @@ const Direction = ({
         departureTime: departureTime ? new Date(departureTime) : null,
         arrivalTime: arrivalTime ? new Date(arrivalTime) : null,
       },
-      provideRouteAlternatives: true,
+      provideRouteAlternatives: true, // Request alternative routes
     };
 
     directionsService
       .route(request)
       .then((result) => {
+        // Filter routes to include only those with bus transit
         const filteredRoutes = result.routes.filter((route) =>
           route.legs.some((leg) =>
             leg.steps.some(
@@ -85,6 +102,7 @@ const Direction = ({
           )
         );
 
+        // Sort routes by duration
         const sortedRoutes = filteredRoutes.sort((a, b) => {
           const durationA = a.legs[0].duration?.value ?? Infinity;
           const durationB = b.legs[0].duration?.value ?? Infinity;
@@ -93,10 +111,10 @@ const Direction = ({
 
         directionsRenderer.setDirections({
           ...result,
-          routes: sortedRoutes,
+          routes: sortedRoutes, // Set filtered and sorted routes in the renderer
         });
 
-        setRoutes(sortedRoutes);
+        setRoutes(sortedRoutes); // Update routes in state
       })
       .catch((error) => {
         console.error("Error fetching routes:", error);
@@ -110,30 +128,42 @@ const Direction = ({
     directionsRenderer,
   ]);
 
+  /**
+   * @useEffect Updates the currently selected route in the map renderer.
+   */
   useEffect(() => {
     if (directionsRenderer && routes.length > 0) {
       directionsRenderer.setRouteIndex(routeIndex);
     }
   }, [routeIndex, directionsRenderer, routes.length]);
 
+  /**
+   * @function handleRouteClick
+   * Handles the selection and deselection of a route.
+   * @param {number} index - The index of the selected route.
+   */
   const handleRouteClick = (index: number) => {
     if (index === routeIndex) {
-      // If the same route is clicked, toggle open state and clear route
       setRouteIndex(-1); // Deselect the current route
       setOpen(null); // Close the dropdown
       dispatch(clearRoute()); // Clear the selected route from the state
     } else {
-      // If a different route is clicked, select the new route
-      setRouteIndex(index);
+      setRouteIndex(index); // Select the new route
       setOpen(index); // Open the dropdown for the selected route
       const selectedRoute = routes[index];
       if (selectedRoute) {
-        const serializableRoute = convertRouteToSerializable(selectedRoute);
+        const serializableRoute = convertRouteToSerializable(selectedRoute); // Convert route to a serializable format
         dispatch(setRoute(serializableRoute)); // Dispatch the new route
       }
     }
   };
 
+  /**
+   * @function renderRouteSummary
+   * Renders the visual summary of the steps in a route, showing walking and bus icons.
+   * @param {google.maps.DirectionsStep[]} steps - The steps of the route.
+   * @returns {JSX.Element} - A visual summary of the route steps.
+   */
   const renderRouteSummary = (steps: google.maps.DirectionsStep[]) => {
     return (
       <Box sx={{ display: "flex", alignItems: "center" }}>
@@ -162,12 +192,14 @@ const Direction = ({
 
   return (
     <Box>
+      {/* Display a message if no routes are available */}
       {routes.length === 0 ? (
         <Typography variant="body2">No selected route available</Typography>
       ) : (
         <>
           {selectedRoute && (
             <>
+              {/* Display the selected route summary */}
               <Typography variant="h6" component="h2" sx={{ mt: 2 }}>
                 {selectedRoute.summary || `Route ${routeIndex + 1}`}
               </Typography>
@@ -187,7 +219,7 @@ const Direction = ({
             </>
           )}
           <Typography variant="h6" component="h2" sx={{ mt: 1 }}>
-            Avialable Routes
+            Available Routes
           </Typography>
           <List
             sx={{

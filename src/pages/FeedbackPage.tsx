@@ -1,3 +1,19 @@
+/**
+ * FeedbackPage component
+ *
+ * The `FeedbackPage` component allows users to provide feedback on their ride,
+ * including entering details like the line number, agency name, rating, and additional comments.
+ * It integrates with the Redux store to prefill certain fields based on the selected route and transit information.
+ * The feedback submission is managed by calling the `FeedbackService` and provides real-time feedback to the user via alerts.
+ *
+ * @component
+ * @returns {JSX.Element} The rendered JSX element for the FeedbackPage component.
+ *
+ * @example
+ * <FeedbackPage />
+ */
+
+// React, Redux, Material-UI, and service imports
 import React, { useEffect, useState } from "react";
 import {
   Box,
@@ -12,53 +28,61 @@ import { useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import FeedbackService from "../services/feedbackService";
 import Feedback from "../dto/feedback/Feedback";
-import useAlert from "../hooks/useAlert"; // Import the custom alert hook
+import useAlert from "../hooks/useAlert"; // Custom alert hook
 import { State } from "../states/reducer";
 import extractFirstStepAsTransit from "../utils/extractFirstStepAsTransit";
 import AppRoutes from "../utils/AppRoutes";
 
-// FeedbackPage component
+/**
+ * FeedbackPage component allows users to submit feedback about their ride,
+ * including line number, agency name, rating, and additional details.
+ * The component fetches route details from the Redux store to pre-fill line number and agency name.
+ *
+ * @returns {JSX.Element} The rendered JSX element for the FeedbackPage component.
+ */
 const FeedbackPage: React.FC = () => {
-  // State to hold form values
-  const [lineNumber, setLineNumber] = useState<string>("");
-  const [agencyName, setAgencyName] = useState<string>("");
-  const [rating, setRating] = useState<number | null>(null);
-  const [userEmail, setUserEmail] = useState<string>("");
-  const [additionalDetails, setAdditionalDetails] = useState<string>("");
+  // Local state to manage form input values
+  const [lineNumber, setLineNumber] = useState<string>(""); // Line number field
+  const [agencyName, setAgencyName] = useState<string>(""); // Agency name field
+  const [rating, setRating] = useState<number | null>(null); // Rating value
+  const [userEmail, setUserEmail] = useState<string>(""); // Optional user email
+  const [additionalDetails, setAdditionalDetails] = useState<string>(""); // Additional feedback details
 
-  const navigate = useNavigate(); // To handle navigation
+  const navigate = useNavigate(); // Navigation hook to redirect the user
+  const theme = useTheme(); // Material-UI theme hook for styling
+  const isNonMobileScreens = useMediaQuery("(min-width: 1000px)"); // Check screen size for responsive design
 
-  // Get theme and media query from Material-UI
-  const theme = useTheme();
-  const isNonMobileScreens = useMediaQuery("(min-width: 1000px)");
-
-  // Use the custom alert hook
+  // Use custom alert hook to display feedback notifications
   const { setAlert } = useAlert();
 
-  // Create an instance of FeedbackService
+  // Create an instance of the feedback service to handle feedback submission
   const feedbackService = new FeedbackService();
 
-  // Get the route from Redux store
+  // Get the current route from the Redux store
   const route = useSelector((state: State) => state.route);
 
+  // Set the document title when the component mounts
   useEffect(() => {
     document.title = "Fill Feedback";
   }, []);
 
-  // UseEffect to fetch first transit step details
+  // UseEffect to pre-fill the line number and agency name based on the first transit step in the route
   useEffect(() => {
     if (route) {
-      const transitStep = extractFirstStepAsTransit(route);
+      const transitStep = extractFirstStepAsTransit(route); // Get first transit step
       if (transitStep) {
-        setLineNumber(transitStep.lineNumber || "");
-        setAgencyName(transitStep.agencyName || "");
+        setLineNumber(transitStep.lineNumber || ""); // Set line number
+        setAgencyName(transitStep.agencyName || ""); // Set agency name
       }
     }
   }, [route]);
 
-  // Function to handle form submission
+  /**
+   * Handles form submission to submit feedback. Validates the form and calls the feedback service.
+   * Displays success or error messages using the alert system.
+   */
   const handleSubmit = async () => {
-    // Perform validations
+    // Validate form inputs before submission
     if (!lineNumber) {
       setAlert({ severity: "error", message: "Line Number is required" });
       return;
@@ -77,7 +101,7 @@ const FeedbackPage: React.FC = () => {
       return;
     }
 
-    // Construct Feedback DTO
+    // Create a new feedback object
     const feedback = new Feedback(
       lineNumber,
       agencyName,
@@ -87,15 +111,16 @@ const FeedbackPage: React.FC = () => {
     );
 
     try {
+      // Submit feedback through the feedback service
       await feedbackService.postFeedback(feedback, agencyName);
 
-      // Trigger success alert
+      // Show success alert
       setAlert({
         severity: "success",
         message: "Feedback submitted successfully",
       });
 
-      // Reset form after submission
+      // Reset form fields after successful submission
       setLineNumber("");
       setAgencyName("");
       setRating(null);
@@ -103,7 +128,7 @@ const FeedbackPage: React.FC = () => {
       setAdditionalDetails("");
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (error: any) {
-      // Trigger error alert
+      // Show error alert if feedback submission fails
       setAlert({
         severity: "error",
         message: `Error submitting feedback: ${error.message}`,
@@ -116,15 +141,15 @@ const FeedbackPage: React.FC = () => {
       display="flex"
       justifyContent="center"
       alignItems="center"
-      minHeight="100vh" // Set minimum height to cover the entire viewport
-      bgcolor="rgba(0, 0, 0, 0.1)" // Light background color for the full page
+      minHeight="100vh" // Ensure the page takes up the full height of the viewport
+      bgcolor="rgba(0, 0, 0, 0.1)" // Light background color
     >
       <Box
-        width={isNonMobileScreens ? "50%" : "93%"} // Width adjustment based on screen size
+        width={isNonMobileScreens ? "50%" : "93%"} // Responsive width based on screen size
         p="2rem"
         borderRadius="1.5rem"
-        bgcolor={theme.palette.background.paper} // Card background color
-        boxShadow="0px 4px 10px rgba(0, 0, 0, 0.1)" // Card shadow
+        bgcolor={theme.palette.background.paper} // Card-like background
+        boxShadow="0px 4px 10px rgba(0, 0, 0, 0.1)" // Light shadow for visual depth
         textAlign="center"
       >
         <Typography
@@ -145,7 +170,7 @@ const FeedbackPage: React.FC = () => {
           We value your feedback. Please fill out the form below.
         </Typography>
 
-        {/* Form Fields */}
+        {/* Form fields for feedback submission */}
         <Box>
           <TextField
             label="Line Number"
@@ -153,7 +178,7 @@ const FeedbackPage: React.FC = () => {
             onChange={(e) => setLineNumber(e.target.value)}
             fullWidth
             margin="normal"
-            inputProps={{ dir: "auto" }} // Automatic direction
+            inputProps={{ dir: "auto" }} // Automatically adjust text direction
             required
           />
           <TextField
@@ -161,13 +186,13 @@ const FeedbackPage: React.FC = () => {
             value={agencyName}
             onChange={(e) => setAgencyName(e.target.value)}
             fullWidth
-            inputProps={{ dir: "auto" }} // Automatic direction
+            inputProps={{ dir: "auto" }} // Automatically adjust text direction
             margin="normal"
             required
           />
 
-          {/* Align the rating field like the other input fields */}
-          <Box display="flex">
+          {/* Rating field */}
+          <Box display="flex" alignItems="center" my="1rem">
             <Typography sx={{ textAlign: "left", marginRight: "1rem" }}>
               Rate Your Ride:
             </Typography>
@@ -190,14 +215,14 @@ const FeedbackPage: React.FC = () => {
             value={additionalDetails}
             onChange={(e) => setAdditionalDetails(e.target.value)}
             fullWidth
-            inputProps={{ dir: "auto" }} // Automatic direction
+            inputProps={{ dir: "auto" }} // Automatically adjust text direction
             margin="normal"
             multiline
             rows={4}
             required
           />
 
-          {/* Submit Button */}
+          {/* Submit Feedback button */}
           <Button
             fullWidth
             variant="contained"
@@ -214,7 +239,7 @@ const FeedbackPage: React.FC = () => {
             Submit Feedback
           </Button>
 
-          {/* Button to navigate to Plan Ride Page */}
+          {/* Button to navigate back to plan a new route */}
           <Button
             fullWidth
             variant="contained"
