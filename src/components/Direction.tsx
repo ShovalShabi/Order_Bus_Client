@@ -15,6 +15,9 @@ import { ExpandLess, ExpandMore } from "@mui/icons-material";
 import { useDispatch } from "react-redux";
 import { clearRoute, setRoute } from "../states/reducer";
 import convertRouteToSerializable from "../states/routeConverter";
+import DirectionsWalkIcon from "@mui/icons-material/DirectionsWalk";
+import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
+import DirectionsBusIcon from "@mui/icons-material/DirectionsBus";
 
 const Direction = ({
   origin,
@@ -131,6 +134,32 @@ const Direction = ({
     }
   };
 
+  const renderRouteSummary = (steps: google.maps.DirectionsStep[]) => {
+    return (
+      <Box sx={{ display: "flex", alignItems: "center" }}>
+        {steps.map((step, index) => {
+          const isLastStep = index === steps.length - 1;
+          return (
+            <Box key={index} sx={{ display: "flex", alignItems: "center" }}>
+              {step.travel_mode === google.maps.TravelMode.WALKING && (
+                <DirectionsWalkIcon />
+              )}
+              {step.travel_mode === google.maps.TravelMode.TRANSIT && (
+                <>
+                  <DirectionsBusIcon />
+                  <Typography variant="body2" sx={{ ml: 1 }}>
+                    {step.transit?.line?.short_name}
+                  </Typography>
+                </>
+              )}
+              {!isLastStep && <ArrowForwardIcon />}
+            </Box>
+          );
+        })}
+      </Box>
+    );
+  };
+
   return (
     <Box>
       {routes.length === 0 ? (
@@ -171,7 +200,26 @@ const Direction = ({
                 <ListItem disablePadding>
                   <ListItemButton onClick={() => handleRouteClick(index)}>
                     <ListItemText
-                      primary={route.summary || `Route ${index + 1}`}
+                      sx={{
+                        width: "100%", // Ensure it takes up full width available
+                        maxWidth: "400px", // Set a max width for larger screens
+                        margin: "0 auto", // Center the box on the screen
+                      }}
+                      primary={
+                        <>
+                          {/* Render the route summary with icons */}
+                          {renderRouteSummary(route.legs[0].steps)}
+
+                          {/* Departure and arrival time displayed below the summary */}
+                          <Typography variant="body2" sx={{ mt: 1 }}>
+                            Departure:{" "}
+                            {route.legs[0].departure_time?.text || "N/A"}
+                          </Typography>
+                          <Typography variant="body2">
+                            Arrival: {route.legs[0].arrival_time?.text || "N/A"}
+                          </Typography>
+                        </>
+                      }
                     />
                     {open === index ? <ExpandLess /> : <ExpandMore />}
                   </ListItemButton>
