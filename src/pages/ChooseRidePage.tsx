@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import {
@@ -7,20 +7,27 @@ import {
   Container,
   Divider,
   Typography,
+  CircularProgress,
+  Fade,
   useMediaQuery,
   useTheme,
 } from "@mui/material";
+import { green } from "@mui/material/colors";
+import CheckCircleIcon from "@mui/icons-material/CheckCircle";
+import ErrorIcon from "@mui/icons-material/Error";
 import CustomMap from "../components/CustomMap";
 import { SerializableRoute, State } from "../states/reducer";
 import AppRoutes from "../utils/AppRoutes";
 import passengerWebSocketService from "../services/passengerWebSocketService";
 import { ILocation } from "../utils/Location";
 import { IRoute } from "../dto/orderBus/IRoute";
+import useAlert from "../hooks/useAlert"; // Importing the alert hook
 
 export default function ChooseRidePage() {
   const navigate = useNavigate();
   const theme = useTheme(); // Get theme from Material-UI
   const isNonMobileScreens = useMediaQuery("(min-width: 1000px)"); // Media query for screen size
+  const { setAlert } = useAlert(); // Using custom alert hook
 
   const routeData: SerializableRoute | null = useSelector(
     (state: State) => state.route
@@ -30,7 +37,10 @@ export default function ChooseRidePage() {
     (state: State) => state.lastTravel
   );
 
-  const [isBusOnTheWay, setIsBusOnTheWay] = useState(false);
+  const [isBusOnTheWay, setIsBusOnTheWay] = useState(true);
+  const [loading, setLoading] = useState(false);
+  const [showIcon, setShowIcon] = useState<"success" | "error" | null>(null); // Control icon visibility
+  const timer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
 
   useEffect(() => {
     if (!travelData) {
@@ -44,14 +54,25 @@ export default function ChooseRidePage() {
 
     // Handle bus accepted event
     passengerWebSocketService.onBusAccepted = () => {
-      console.log("Bus is on the way to the passenger!");
       setIsBusOnTheWay(true);
+      setLoading(false);
+      setShowIcon("success"); // Show success icon
+      setAlert({
+        message: "Bus is on the way to the passenger!",
+        severity: "success",
+      });
+
+      // Fade away success icon after 2 seconds
+      setTimeout(() => setShowIcon(null), 2000);
     };
 
     // Handle ride canceled event
     passengerWebSocketService.onRideCanceled = () => {
-      console.log("Ride has been canceled");
       setIsBusOnTheWay(false);
+      setAlert({
+        message: "Ride has been canceled by the driver.",
+        severity: "warning",
+      });
     };
 
     // Start the ping mechanism with routeData
@@ -66,26 +87,44 @@ export default function ChooseRidePage() {
         passengerWebSocketService.disconnect();
       }
     };
-  }, [travelData, routeData, navigate]);
-
-  const handleGoBack = () => {
-    handleCancelRide();
-    navigate(AppRoutes.PLAN_RIDE_PAGE);
-  };
+  }, [travelData, routeData, navigate, setAlert]);
 
   const handleOrderBus = () => {
     if (routeData) {
+      setShowIcon(null); // Reset icon
+      setLoading(true);
+
+      // Send the order bus request
       passengerWebSocketService.orderBus(
         routeData.legs[0].start_coord as ILocation,
         routeData.legs[0].end_coord as ILocation
       );
-      console.log(
-        "Bus ordered for ride from:",
-        travelData?.origin,
-        "to:",
-        travelData?.destination
-      );
+
+      setAlert({
+        message: "Bus order placed, waiting for drivers to respond...",
+        severity: "info",
+      });
+
+      // Start a timer for 1 minute to simulate the waiting time
+      timer.current = setTimeout(() => {
+        setLoading(false);
+        if (!isBusOnTheWay) {
+          setShowIcon("error"); // Indicate failure
+          setAlert({
+            message: "No drivers responded. Please try again.",
+            severity: "error",
+          });
+
+          // Fade away error icon after 2 seconds
+          setTimeout(() => setShowIcon(null), 2000);
+        }
+      }, 60000); // 1 minute
     }
+  };
+
+  const handleGoBack = () => {
+    if (loading) handleCancelRide();
+    navigate(AppRoutes.PLAN_RIDE_PAGE);
   };
 
   const handleCancelRide = () => {
@@ -94,12 +133,11 @@ export default function ChooseRidePage() {
         routeData.legs[0].start_coord as ILocation,
         routeData.legs[0].end_coord as ILocation
       );
-      console.log(
-        "Ride canceled from:",
-        travelData?.origin,
-        "to:",
-        travelData?.destination
-      );
+      setAlert({
+        message: "Ride canceled successfully.",
+        severity: "info",
+      });
+      setIsBusOnTheWay(false);
     }
   };
 
@@ -151,40 +189,88 @@ export default function ChooseRidePage() {
           <Box
             sx={{
               display: "flex",
-              justifyContent: "center",
+              justifyContent: "space-between", // Spread buttons evenly
               alignItems: "center",
               p: 2,
-              backgroundColor: theme.palette.primary.light, // Keep the background consistent with the theme
+              backgroundColor: theme.palette.primary.light, // Consistent background color
+              gap: 2, // Space between buttons
             }}
           >
             <Button
               variant="contained"
               color="secondary"
               onClick={handleGoBack}
-              sx={{ mx: 2 }}
+              sx={{ flex: 1, mx: 1 }} // Equal space for "Go Back" button
               fullWidth={isNonMobileScreens ? false : true} // Full-width on mobile screens
             >
               Go Back
             </Button>
+
+            {/* Order Bus Button with Circular Progress and Icon */}
             <Button
               variant="contained"
               color="primary"
               onClick={handleOrderBus}
-              sx={{ mx: 2 }}
-              fullWidth={isNonMobileScreens ? false : true} // Full-width on mobile screens
+              disabled={loading || showIcon !== null} // Disable when loading or icon is shown
+              fullWidth
+              sx={{ flex: 1, position: "relative", mx: 1 }} // Ensure full width and relative positioning for the icon/progress
             >
-              Order Bus
+              {loading ? "Ordering..." : "Order Bus"}
+
+              {loading && (
+                <CircularProgress
+                  size={24}
+                  sx={{
+                    color: green[500],
+                    position: "absolute",
+                    top: "50%",
+                    left: "50%",
+                    marginTop: "-12px",
+                    marginLeft: "-12px",
+                  }}
+                />
+              )}
+
+              <Fade in={showIcon === "success"}>
+                <CheckCircleIcon
+                  sx={{
+                    color: green[500],
+                    position: "absolute",
+                    top: "50%",
+                    left: "50%",
+                    marginTop: "-12px",
+                    marginLeft: "-12px",
+                  }}
+                />
+              </Fade>
+
+              <Fade in={showIcon === "error"}>
+                <ErrorIcon
+                  sx={{
+                    color: theme.palette.error.main,
+                    position: "absolute",
+                    top: "50%",
+                    left: "50%",
+                    marginTop: "-12px",
+                    marginLeft: "-12px",
+                  }}
+                />
+              </Fade>
             </Button>
+
+            {/* Cancel Ride Button (Only shown when the bus is on the way) */}
             {isBusOnTheWay && (
-              <Button
-                variant="contained"
-                color="error"
-                onClick={handleCancelRide}
-                sx={{ mx: 2 }}
-                fullWidth={isNonMobileScreens ? false : true} // Full-width on mobile screens
-              >
-                Cancel Ride
-              </Button>
+              <Fade in={isBusOnTheWay}>
+                <Button
+                  variant="contained"
+                  color="error"
+                  onClick={handleCancelRide}
+                  sx={{ flex: 1, mx: 1 }} // Equal space for "Cancel Ride" button
+                  fullWidth={isNonMobileScreens ? false : true} // Full-width on mobile screens
+                >
+                  Cancel Ride
+                </Button>
+              </Fade>
             )}
           </Box>
         </Container>
