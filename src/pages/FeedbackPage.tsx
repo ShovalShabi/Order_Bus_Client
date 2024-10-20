@@ -104,11 +104,11 @@ const FeedbackPage: React.FC = () => {
       >
         <Typography
           fontWeight="bold"
-          fontSize="32px"
+          variant="h2"
           color={theme.palette.primary.main}
           mb="1rem"
         >
-          Feedback Form
+          Tell Us More About Your Ride!
         </Typography>
 
         <Typography
@@ -128,6 +128,7 @@ const FeedbackPage: React.FC = () => {
             onChange={(e) => setLineNumber(e.target.value)}
             fullWidth
             margin="normal"
+            inputProps={{ dir: "auto" }} // Automatic direction
             required
           />
           <TextField
@@ -135,6 +136,7 @@ const FeedbackPage: React.FC = () => {
             value={agencyName}
             onChange={(e) => setAgencyName(e.target.value)}
             fullWidth
+            inputProps={{ dir: "auto" }} // Automatic direction
             margin="normal"
             required
           />
@@ -163,6 +165,7 @@ const FeedbackPage: React.FC = () => {
             value={additionalDetails}
             onChange={(e) => setAdditionalDetails(e.target.value)}
             fullWidth
+            inputProps={{ dir: "auto" }} // Automatic direction
             margin="normal"
             multiline
             rows={4}
