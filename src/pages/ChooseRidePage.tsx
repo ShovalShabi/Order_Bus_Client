@@ -11,6 +11,7 @@ import {
   Fade,
   useMediaQuery,
   useTheme,
+  Link,
 } from "@mui/material";
 import { green } from "@mui/material/colors";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
@@ -22,6 +23,7 @@ import passengerWebSocketService from "../services/passengerWebSocketService";
 import { ILocation } from "../utils/Location";
 import { IRoute } from "../dto/orderBus/IRoute";
 import useAlert from "../hooks/useAlert"; // Importing the alert hook
+import extractFirstStepAsTransit from "../utils/extractFirstStepAsTransit";
 
 export default function ChooseRidePage() {
   const navigate = useNavigate();
@@ -37,7 +39,7 @@ export default function ChooseRidePage() {
     (state: State) => state.lastTravel
   );
 
-  const [isBusOnTheWay, setIsBusOnTheWay] = useState(true);
+  const [isBusOnTheWay, setIsBusOnTheWay] = useState(false);
   const [loading, setLoading] = useState(false);
   const [showIcon, setShowIcon] = useState<"success" | "error" | null>(null); // Control icon visibility
   const timer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
@@ -69,8 +71,22 @@ export default function ChooseRidePage() {
     // Handle ride canceled event
     passengerWebSocketService.onRideCanceled = () => {
       setIsBusOnTheWay(false);
+      // Set alert with a hyperlink for feedback
       setAlert({
-        message: "Ride has been canceled by the driver.",
+        message: (
+          <span>
+            Ride has been canceled by the driver.{" "}
+            <Link
+              component="button"
+              variant="body2"
+              color="inherit"
+              underline="always"
+              onClick={() => navigate(AppRoutes.FILL_RIDE_EXPERIENCE)}
+            >
+              Fill out report on company's bus line.
+            </Link>
+          </span>
+        ),
         severity: "warning",
       });
     };
@@ -94,10 +110,12 @@ export default function ChooseRidePage() {
       setShowIcon(null); // Reset icon
       setLoading(true);
 
+      const step = extractFirstStepAsTransit(routeData); // the first step that involves tranist transportation
+
       // Send the order bus request
       passengerWebSocketService.orderBus(
-        routeData.legs[0].start_coord as ILocation,
-        routeData.legs[0].end_coord as ILocation
+        step?.start_location as ILocation,
+        step?.end_location as ILocation
       );
 
       setAlert({
@@ -111,7 +129,20 @@ export default function ChooseRidePage() {
         if (!isBusOnTheWay) {
           setShowIcon("error"); // Indicate failure
           setAlert({
-            message: "No drivers responded. Please try again.",
+            message: (
+              <span>
+                No drivers responded. Please try again later.{"\n"}
+                <Link
+                  component="button"
+                  variant="body2"
+                  color="inherit"
+                  underline="always"
+                  onClick={() => navigate(AppRoutes.FILL_RIDE_EXPERIENCE)}
+                >
+                  Share with us your ride experince.
+                </Link>
+              </span>
+            ),
             severity: "error",
           });
 
