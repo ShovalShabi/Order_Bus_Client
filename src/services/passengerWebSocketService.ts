@@ -15,6 +15,14 @@ const passengerWebSocketService = {
   shouldReconnect: true, // Flag to control reconnection behavior
 
   connect() {
+    if (
+      this.websocket &&
+      (this.websocket.readyState === WebSocket.OPEN ||
+        this.websocket.readyState === WebSocket.CONNECTING)
+    ) {
+      console.log("slipped connection");
+      return;
+    }
     console.log(
       `Connecting to WebSocket -> ${this.webSocketOrderBusServiceURL}`
     );
@@ -28,7 +36,10 @@ const passengerWebSocketService = {
 
     this.websocket.onmessage = (event) => {
       const message = JSON.parse(event.data);
-      console.log("Message received from server:", message);
+      console.log(
+        `session with id ${event.data.sessionId} got message from server:${message}`,
+        message
+      );
 
       if (message.option === WebSocketOptions.ACCEPTING_RIDE) {
         this.onBusAccepted(); // Trigger when bus is accepted
@@ -45,15 +56,30 @@ const passengerWebSocketService = {
     };
 
     this.websocket.onerror = (error) => {
-      console.error("WebSocket error:", error);
-      this.websocket?.close(); // Close and reconnect
+      console.error("WebSocket error occurred:", error);
+
+      if (this.websocket?.readyState === WebSocket.CLOSED) {
+        console.error(
+          "WebSocket connection was closed before it could be established."
+        );
+      } else if (this.websocket?.readyState === WebSocket.CLOSING) {
+        console.error("WebSocket is in the process of closing.");
+      } else if (this.websocket?.readyState === WebSocket.CONNECTING) {
+        console.error("WebSocket is still connecting.");
+      }
     };
   },
 
   disconnect() {
     if (this.websocket) {
+      if (this.websocket.readyState === WebSocket.CONNECTING) return;
+
       this.shouldReconnect = false; // Prevent reconnection on intentional disconnect
-      this.websocket.close();
+      if (
+        this.websocket?.readyState === WebSocket.CONNECTING ||
+        this.websocket?.readyState === WebSocket.OPEN
+      )
+        this.websocket?.close(); // Close and reconnect
       this.websocket = null;
       this.stopPing();
       if (this.reconnectTimeoutId) {
