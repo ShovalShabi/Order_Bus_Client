@@ -2,12 +2,12 @@ import { createContext, useState, ReactNode } from "react";
 
 interface AlertContextType {
   alert: {
-    message: string;
+    message: string | ReactNode;
     severity: "error" | "warning" | "info" | "success";
   } | null;
   setAlert: (
     alert: {
-      message: string;
+      message: string | ReactNode;
       severity: "error" | "warning" | "info" | "success";
     } | null
   ) => void;
