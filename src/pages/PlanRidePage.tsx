@@ -1,12 +1,13 @@
 import React, { useState } from "react";
 import {
-  Container,
   TextField,
   Button,
   Grid,
   Box,
   Typography,
   Grow,
+  useTheme,
+  useMediaQuery,
 } from "@mui/material";
 import { useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
@@ -19,6 +20,10 @@ const PlanRidePage: React.FC = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const { apiGlobalKey } = getEnvVariables();
+
+  // Get theme and media query from Material-UI
+  const theme = useTheme();
+  const isNonMobileScreens = useMediaQuery("(min-width: 1000px)");
 
   // Get the travel data from Redux store
   const travelData = useSelector((state: State) => state.lastTravel);
@@ -115,93 +120,117 @@ const PlanRidePage: React.FC = () => {
   };
 
   return (
-    <Container maxWidth="sm">
+    <Box
+      display="flex"
+      justifyContent="center"
+      alignItems="center"
+      minHeight="100vh"
+      bgcolor="rgba(0, 0, 0, 0.1)" // Light background for the page
+    >
       <Box
-        display="flex"
-        flexDirection="column"
-        alignItems="center"
-        justifyContent="center"
-        minHeight="100vh"
-        bgcolor="background.default"
+        width={isNonMobileScreens ? "50%" : "93%"} // Adjust width based on screen size
+        p="2rem"
+        borderRadius="1.5rem"
+        bgcolor={theme.palette.background.paper} // Card background
+        boxShadow="0px 4px 10px rgba(0, 0, 0, 0.1)" // Light shadow for the card
       >
-        <Grow in timeout={1000}>
-          <Typography variant="h4" gutterBottom>
-            Where are you heading?
-          </Typography>
-        </Grow>
-        <Grow in timeout={1500}>
-          <Grid container spacing={2}>
-            <Grid item xs={12}>
-              <TextField
-                label="Departure"
-                variant="outlined"
-                value={departure}
-                onChange={(e) => setDeparture(e.target.value)}
-                fullWidth
-                inputProps={{ dir: "auto" }}
-              />
+        <Box
+          display="flex"
+          flexDirection="column"
+          alignItems="center"
+          justifyContent="center"
+        >
+          <Grow in timeout={1000}>
+            <Typography
+              variant="h2"
+              fontWeight="bold"
+              mb="1rem"
+              color={theme.palette.primary.main}
+            >
+              Where Are You Heading?
+            </Typography>
+          </Grow>
+
+          <Grow in timeout={1500}>
+            <Grid container spacing={2}>
+              <Grid item xs={12}>
+                <TextField
+                  label="Departure"
+                  variant="outlined"
+                  value={departure}
+                  onChange={(e) => setDeparture(e.target.value)}
+                  fullWidth
+                  margin="normal"
+                  required
+                  inputProps={{ dir: "auto" }} // Automatic direction
+                />
+              </Grid>
+              <Grid item xs={12}>
+                <TextField
+                  label="Destination"
+                  variant="outlined"
+                  value={destination}
+                  onChange={(e) => setDestination(e.target.value)}
+                  fullWidth
+                  margin="normal"
+                  required
+                  inputProps={{ dir: "auto" }} // Automatic direction
+                />
+              </Grid>
+              <Grid item xs={12}>
+                <Typography variant="subtitle1" gutterBottom>
+                  Departure Time
+                </Typography>
+                <TextField
+                  type="time"
+                  variant="outlined"
+                  value={departureTime}
+                  onChange={(e) => setDepartureTime(e.target.value)}
+                  fullWidth
+                  inputProps={{ step: 300 }} // 5 minutes interval
+                />
+              </Grid>
+              <Grid item xs={12}>
+                <Typography variant="subtitle1" gutterBottom>
+                  Arrival Time
+                </Typography>
+                <TextField
+                  type="time"
+                  variant="outlined"
+                  value={arrivalTime}
+                  onChange={(e) => setArrivalTime(e.target.value)}
+                  fullWidth
+                  inputProps={{ step: 300 }} // 5 minutes interval
+                />
+              </Grid>
+
+              <Grid item xs={6}>
+                <Button
+                  variant="contained"
+                  color="primary"
+                  onClick={handleLocateMe}
+                  fullWidth
+                >
+                  Locate Me
+                </Button>
+              </Grid>
+
+              <Grid item xs={6}>
+                <Button
+                  variant="contained"
+                  color="primary"
+                  onClick={handleSubmit}
+                  disabled={!departure || !destination}
+                  fullWidth
+                >
+                  Submit
+                </Button>
+              </Grid>
             </Grid>
-            <Grid item xs={12}>
-              <TextField
-                label="Destination"
-                variant="outlined"
-                value={destination}
-                onChange={(e) => setDestination(e.target.value)}
-                fullWidth
-                inputProps={{ dir: "auto" }}
-              />
-            </Grid>
-            <Grid item xs={12}>
-              <Typography variant="subtitle1" gutterBottom>
-                Departure Time
-              </Typography>
-              <TextField
-                type="time"
-                variant="outlined"
-                value={departureTime}
-                onChange={(e) => setDepartureTime(e.target.value)}
-                fullWidth
-                inputProps={{ step: 300 }} // 5 minutes interval
-              />
-            </Grid>
-            <Grid item xs={12}>
-              <Typography variant="subtitle1" gutterBottom>
-                Arrival Time
-              </Typography>
-              <TextField
-                type="time"
-                variant="outlined"
-                value={arrivalTime}
-                onChange={(e) => setArrivalTime(e.target.value)}
-                fullWidth
-                inputProps={{ step: 300 }} // 5 minutes interval
-              />
-            </Grid>
-            <Grid item xs={6}>
-              <Button
-                variant="contained"
-                color="primary"
-                onClick={handleLocateMe}
-                fullWidth
-              >
-                Locate Me
-              </Button>
-            </Grid>
-            <Grid item xs={6}>
-              <Button
-                variant="contained"
-                color="primary"
-                onClick={handleSubmit}
-                disabled={!departure || !destination}
-                fullWidth
-              >
-                Submit
-              </Button>
-            </Grid>
-          </Grid>
-        </Grow>
+          </Grow>
+        </Box>
       </Box>
-    </Container>
+    </Box>
   );
 };
 
