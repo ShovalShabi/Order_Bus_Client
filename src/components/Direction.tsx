@@ -9,6 +9,7 @@ import {
   ListItemButton,
   ListItemText,
   Collapse,
+  Divider,
 } from "@mui/material";
 import { ExpandLess, ExpandMore } from "@mui/icons-material";
 import { useDispatch } from "react-redux";
@@ -132,53 +133,65 @@ const Direction = ({
 
   return (
     <Box>
-      {selectedRoute ? (
-        <>
-          <Typography variant="h6" component="h2">
-            {selectedRoute.summary || `Route ${routeIndex + 1}`}
-          </Typography>
-          <Typography variant="body2">
-            {leg?.start_address.split(",")[0]} to{" "}
-            {leg?.end_address.split(",")[0]}
-          </Typography>
-          <Typography variant="body2">
-            Distance: {leg?.distance?.text}
-          </Typography>
-          <Typography variant="body2">
-            Duration: {leg?.duration?.text}
-          </Typography>
-          <Typography variant="body2">
-            Departure time: {leg?.departure_time?.text}
-          </Typography>
-        </>
-      ) : (
+      {routes.length === 0 ? (
         <Typography variant="body2">No selected route available</Typography>
+      ) : (
+        <>
+          {selectedRoute && (
+            <>
+              <Typography variant="h6" component="h2" sx={{ mt: 2 }}>
+                {selectedRoute.summary || `Route ${routeIndex + 1}`}
+              </Typography>
+              <Typography variant="body2">
+                {leg?.start_address.split(",")[0]} to{" "}
+                {leg?.end_address.split(",")[0]}
+              </Typography>
+              <Typography variant="body2">
+                Distance: {leg?.distance?.text}
+              </Typography>
+              <Typography variant="body2">
+                Duration: {leg?.duration?.text}
+              </Typography>
+              <Typography variant="body2">
+                Departure time: {leg?.departure_time?.text}
+              </Typography>
+            </>
+          )}
+          <Typography variant="h6" component="h2" sx={{ mt: 1 }}>
+            Avialable Routes
+          </Typography>
+          <List
+            sx={{
+              maxHeight: "500px", // Set a max height for the list
+              overflowY: "auto", // Enable vertical scrolling if content exceeds the height
+            }}
+          >
+            {routes.map((route, index) => (
+              <Box key={index}>
+                <ListItem disablePadding>
+                  <ListItemButton onClick={() => handleRouteClick(index)}>
+                    <ListItemText
+                      primary={route.summary || `Route ${index + 1}`}
+                    />
+                    {open === index ? <ExpandLess /> : <ExpandMore />}
+                  </ListItemButton>
+                </ListItem>
+                <Collapse in={open === index} timeout="auto" unmountOnExit>
+                  <List component="div" disablePadding sx={{ pl: 4 }}>
+                    {route.legs[0].steps.map((step, stepIndex) => (
+                      <ListItem key={stepIndex}>
+                        <ListItemText primary={step.instructions} />
+                      </ListItem>
+                    ))}
+                  </List>
+                </Collapse>
+                {index !== routes.length - 1 && <Divider />}{" "}
+                {/* Add divider between items except the last one */}
+              </Box>
+            ))}
+          </List>
+        </>
       )}
-
-      <Typography variant="h6" component="h2" sx={{ mt: 2 }}>
-        Other Routes
-      </Typography>
-      <List>
-        {routes.map((route, index) => (
-          <Box key={index}>
-            <ListItem disablePadding>
-              <ListItemButton onClick={() => handleRouteClick(index)}>
-                <ListItemText primary={route.summary || `Route ${index + 1}`} />
-                {open === index ? <ExpandLess /> : <ExpandMore />}
-              </ListItemButton>
-            </ListItem>
-            <Collapse in={open === index} timeout="auto" unmountOnExit>
-              <List component="div" disablePadding sx={{ pl: 4 }}>
-                {route.legs[0].steps.map((step, stepIndex) => (
-                  <ListItem key={stepIndex}>
-                    <ListItemText primary={step.instructions} />
-                  </ListItem>
-                ))}
-              </List>
-            </Collapse>
-          </Box>
-        ))}
-      </List>
     </Box>
   );
 };
