@@ -96,7 +96,7 @@ export default function CustomMap({
             <Box
               sx={{
                 position: "absolute",
-                top: "10px",
+                top: "60px",
                 left: "10px",
                 zIndex: 1000,
                 backgroundColor: "white",
