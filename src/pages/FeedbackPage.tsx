@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   Box,
   Button,
@@ -8,9 +8,14 @@ import {
   useTheme,
   useMediaQuery,
 } from "@mui/material";
+import { useSelector } from "react-redux";
+import { useNavigate } from "react-router-dom";
 import FeedbackService from "../services/feedbackService";
 import Feedback from "../dto/feedback/Feedback";
 import useAlert from "../hooks/useAlert"; // Import the custom alert hook
+import { State } from "../states/reducer";
+import extractFirstStepAsTransit from "../utils/extractFirstStepAsTransit";
+import AppRoutes from "../utils/AppRoutes";
 
 // FeedbackPage component
 const FeedbackPage: React.FC = () => {
@@ -21,6 +26,8 @@ const FeedbackPage: React.FC = () => {
   const [userEmail, setUserEmail] = useState<string>("");
   const [additionalDetails, setAdditionalDetails] = useState<string>("");
 
+  const navigate = useNavigate(); // To handle navigation
+
   // Get theme and media query from Material-UI
   const theme = useTheme();
   const isNonMobileScreens = useMediaQuery("(min-width: 1000px)");
@@ -30,6 +37,20 @@ const FeedbackPage: React.FC = () => {
 
   // Create an instance of FeedbackService
   const feedbackService = new FeedbackService();
+
+  // Get the route from Redux store
+  const route = useSelector((state: State) => state.route);
+
+  // UseEffect to fetch first transit step details
+  useEffect(() => {
+    if (route) {
+      const transitStep = extractFirstStepAsTransit(route);
+      if (transitStep) {
+        setLineNumber(transitStep.lineNumber || "");
+        setAgencyName(transitStep.agencyName || "");
+      }
+    }
+  }, [route]);
 
   // Function to handle form submission
   const handleSubmit = async () => {
@@ -187,6 +208,17 @@ const FeedbackPage: React.FC = () => {
             }}
           >
             Submit Feedback
+          </Button>
+
+          {/* Button to navigate to Plan Ride Page */}
+          <Button
+            fullWidth
+            variant="contained"
+            color="secondary"
+            onClick={() => navigate(AppRoutes.PLAN_RIDE_PAGE)}
+            sx={{ p: "1rem" }}
+          >
+            Plan Another Route
           </Button>
         </Box>
       </Box>
