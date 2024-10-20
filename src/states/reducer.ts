@@ -41,6 +41,7 @@ export interface CustomStep {
   instructions: string;
   distance: string;
   duration: string;
+  agencyName: string;
   lineNumber?: string;
 }
 
