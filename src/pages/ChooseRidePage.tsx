@@ -45,6 +45,10 @@ export default function ChooseRidePage() {
   const timer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
 
   useEffect(() => {
+    document.title = "Choose Your Ride";
+  }, []);
+
+  useEffect(() => {
     if (!travelData) {
       passengerWebSocketService.disconnect();
       navigate(AppRoutes.PLAN_RIDE_PAGE);

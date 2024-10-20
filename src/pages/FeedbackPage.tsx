@@ -41,6 +41,10 @@ const FeedbackPage: React.FC = () => {
   // Get the route from Redux store
   const route = useSelector((state: State) => state.route);
 
+  useEffect(() => {
+    document.title = "Fill Feedback";
+  }, []);
+
   // UseEffect to fetch first transit step details
   useEffect(() => {
     if (route) {

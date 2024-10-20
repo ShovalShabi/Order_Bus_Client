@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   TextField,
   Button,
@@ -33,6 +33,10 @@ const PlanRidePage: React.FC = () => {
   const [destination, setDestination] = useState<string>(
     travelData?.destination || ""
   );
+
+  useEffect(() => {
+    document.title = "Plan Your Ride";
+  }, []);
 
   const [departureTime, setDepartureTime] = useState<string>(() => {
     if (travelData?.departureTime) {
