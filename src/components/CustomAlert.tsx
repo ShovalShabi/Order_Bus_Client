@@ -35,7 +35,7 @@ const CustomAlert = () => {
             severity={alert.severity} // Severity of the alert (error, warning, info, or success)
             sx={{ width: "100%" }} // Set alert to occupy full width
           >
-            {alert.message} // Display the alert message
+            {alert.message}
           </Alert>
         </Snackbar>
       )}
