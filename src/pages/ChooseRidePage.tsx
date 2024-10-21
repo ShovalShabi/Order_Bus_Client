@@ -89,7 +89,7 @@ export default function ChooseRidePage() {
       setLoading(false);
       setShowIcon("success"); // Show success icon
       setAlert({
-        message: "Bus is on the way to the passenger!",
+        message: "Bus is on the way to you!",
         severity: "success",
       });
 
