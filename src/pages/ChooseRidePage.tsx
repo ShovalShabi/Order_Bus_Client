@@ -84,12 +84,12 @@ export default function ChooseRidePage() {
     passengerWebSocketService.connect();
 
     // Event: Bus accepted by a driver
-    passengerWebSocketService.onBusAccepted = () => {
+    passengerWebSocketService.onBusAccepted = (payload: string) => {
       setIsBusOnTheWay(true);
       setLoading(false);
       setShowIcon("success"); // Show success icon
       setAlert({
-        message: "Bus is on the way to you!",
+        message: payload,
         severity: "success",
       });
 

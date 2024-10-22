@@ -45,13 +45,9 @@ const passengerWebSocketService = {
 
     this.websocket.onmessage = (event) => {
       const message = JSON.parse(event.data);
-      console.log(
-        `session with id ${event.data.sessionId} got message from server:${message}`,
-        message
-      );
 
       if (message.option === WebSocketOptions.ACCEPTING_RIDE) {
-        this.onBusAccepted(); // Trigger when bus is accepted
+        this.onBusAccepted(message.payload); // Trigger when bus is accepted
       } else if (message.option === WebSocketOptions.CANCELING_RIDE) {
         this.onRideCanceled(); // Trigger when ride is canceled
       }
@@ -192,7 +188,9 @@ const passengerWebSocketService = {
   },
 
   // Custom event handlers to be implemented by consuming components
-  onBusAccepted() {},
+  onBusAccepted(payload: string) {
+    console.log(payload);
+  },
   onRideCanceled() {},
 };
 
