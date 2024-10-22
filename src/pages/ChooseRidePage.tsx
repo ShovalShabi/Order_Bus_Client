@@ -95,6 +95,7 @@ export default function ChooseRidePage() {
 
       // Hide success icon after 2 seconds
       setTimeout(() => setShowIcon(null), 2000);
+      clearTimeout(timer.current);
     };
 
     // Event: Ride canceled by driver
@@ -279,7 +280,15 @@ export default function ChooseRidePage() {
               variant="contained"
               color="primary"
               onClick={handleOrderBus}
-              disabled={loading || showIcon !== null}
+              /**
+               * Disabled only in those cases:
+               * 1) When a bus is being ordered and the user still accepting for pickup
+               * 2) The is no route seleted yet.
+               * 3) The bus is on it's way
+               */
+              disabled={
+                loading || showIcon !== null || !routeData || isBusOnTheWay
+              }
               fullWidth
               sx={{ flex: 1, position: "relative", mx: 1 }}
             >
