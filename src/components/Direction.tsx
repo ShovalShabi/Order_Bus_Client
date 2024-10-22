@@ -223,7 +223,7 @@ const Direction = ({
           </Typography>
           <List
             sx={{
-              maxHeight: "500px", // Set a max height for the list
+              maxHeight: "300px", // Set a max height for the list
               overflowY: "auto", // Enable vertical scrolling if content exceeds the height
             }}
           >
