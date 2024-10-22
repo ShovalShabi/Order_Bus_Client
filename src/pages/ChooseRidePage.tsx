@@ -284,7 +284,7 @@ export default function ChooseRidePage() {
                * Disabled only in those cases:
                * 1) When a bus is being ordered and the user still accepting for pickup
                * 2) The is no route seleted yet.
-               * 3) The bus is on it's way
+               * 3) The bus is on it's way.
                */
               disabled={
                 loading || showIcon !== null || !routeData || isBusOnTheWay
