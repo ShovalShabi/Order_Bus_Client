@@ -39,6 +39,9 @@ const getEnvVariables = () => {
   const mapID = VITE_MAP_ID || "";
 
   let port = 0;
+  let protocolHttp = "http";
+  let backendPort = VITE_BACKEND_PORT;
+  let webSocketProtocol = "ws";
 
   // Configure port based on environment
   if (env === "dev") {
@@ -47,15 +50,18 @@ const getEnvVariables = () => {
   } else if (env === "prod") {
     // Production environment: use production port, defaulting to 7001
     port = parseInt(VITE_PROD_PORT || "7001", 10);
+    protocolHttp = "https";
+    backendPort = "80";
+    webSocketProtocol = "wss";
   } else {
     // Default to port 0 for other cases (e.g., testing)
     port = 0;
   }
 
   // Construct URLs for services based on environment variables
-  const orderBusURL = `http://${VITE_BACKEND_HOST}:${VITE_BACKEND_PORT}/${VITE_ORDER_BUS_SERVICE_ENDPOINT}`;
-  const feedbackURL = `http://${VITE_BACKEND_HOST}:${VITE_BACKEND_PORT}/${VITE_FEEDBACK_SERVICE_ENDPOINT}`;
-  const webSocketOrderBusServiceURL = `ws://${VITE_BACKEND_HOST}:${VITE_BACKEND_PORT}/${VITE_ORDER_BUS_SRVICE_WS_ENDPOINT}`;
+  const orderBusURL = `${protocolHttp}://${VITE_BACKEND_HOST}:${backendPort}/${VITE_ORDER_BUS_SERVICE_ENDPOINT}`;
+  const feedbackURL = `${protocolHttp}://${VITE_BACKEND_HOST}:${backendPort}/${VITE_FEEDBACK_SERVICE_ENDPOINT}`;
+  const webSocketOrderBusServiceURL = `${webSocketProtocol}://${VITE_BACKEND_HOST}:${backendPort}/${VITE_ORDER_BUS_SRVICE_WS_ENDPOINT}`;
 
   // Return the gathered and constructed environment variables
   return {
